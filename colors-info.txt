@@ -1,0 +1,10 @@
+# Primary Colors #
+Color,Hex Code,Description,Suggested Use
+Black,#000000,"Strong, solid black from the shield and main text.","Backgrounds, primary text, borders, headers."
+Orange/Terracotta,#D4622B,"The distinct, deep orange/terracotta color from the right side of the shield and the foliage accents.","Accent color, call-to-action buttons, hero sections, footers."
+Gold/Yellow,#FFD700,"The bright gold/yellow used for the crown, sun rays, and accents.","Highlighted elements, secondary text, small icons, hover effects."
+
+# Secondary Colors #
+Color,Hex Code,Description,Suggested Use
+White,#FFFFFF,"Essential for contrast, especially against the black and orange.","Main background color, primary text color over dark sections, navigation bar."
+Dark Orange Accent,#A84E22,A slightly darker shade of the primary orange found in shadowed areas.,"Dividers, subtle backgrounds, borders, or hover states for the main orange."

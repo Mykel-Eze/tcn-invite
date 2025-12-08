@@ -1,16 +1,19 @@
-import { useState } from 'react'
-import './App.css'
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import Dashboard from './pages/Dashboard'
+import InvitationFlow from './pages/InvitationFlow'
+import PCUCheckIn from './pages/PCUCheckIn'
 
-function App() {
-  const [ count, setCount ] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div className="min-h-screen">
-        <h1>TCN Invite</h1>
-      </div>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/invite/new" element={<InvitationFlow />} />
+        <Route path="/pcu-checkin" element={<PCUCheckIn />} />
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
-
-export default App

@@ -1,5 +1,6 @@
 import React from "react"
 import { QRCodeCanvas } from "qrcode.react"
+import icon from "../../assets/images/tcn_icon.png"
 
 const FlyerModern = React.forwardRef(({ guestName, campus, time, qrCodeValue }, ref) => {
     return (
@@ -9,7 +10,8 @@ const FlyerModern = React.forwardRef(({ guestName, campus, time, qrCodeValue }, 
             <div className="absolute bottom-0 left-0 w-[150px] h-[150px] bg-[var(--color-highlight)] rounded-full blur-[80px] opacity-20 -translate-x-1/2 translate-y-1/4" />
 
             {/* Header */}
-            <div className="z-10 text-center space-y-2 mt-8">
+            <div className="z-10 text-center space-y-2 mt-8 flex flex-col items-center">
+                <img src={icon} alt="Icon" className="w-8 h-8 mb-2" />
                 <h3 className="text-[var(--color-accent)] font-bold tracking-widest text-sm uppercase">You Are Invited</h3>
                 <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                     Sunday Service

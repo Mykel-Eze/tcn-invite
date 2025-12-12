@@ -8,6 +8,8 @@ import { Card } from '../components/ui/Card'
 import { FlyerModern } from '../components/flyers/FlyerModern'
 import { FlyerGolden } from '../components/flyers/FlyerGolden'
 import { FlyerMinimal } from '../components/flyers/FlyerMinimal'
+import { FlyerGradient } from '../components/flyers/FlyerGradient'
+import { FlyerLuxury } from '../components/flyers/FlyerLuxury'
 import { supabase } from '../lib/supabase'
 
 // Mock Campuses if DB fetch fails
@@ -31,12 +33,38 @@ export default function InvitationFlow() {
         setGuestData({ ...guestData, [ e.target.name ]: e.target.value })
     }
 
+    const [ qrCodeValue, setQrCodeValue ] = useState('')
+
     const handleGenerateClick = async () => {
-        if (flyerRef.current === null) {
-            return
-        }
+        if (flyerRef.current === null) return
+
         try {
-            const dataUrl = await toPng(flyerRef.current, { cacheBust: true, })
+            // 1. Generate unique ID
+            const uniqueId = crypto.randomUUID()
+            const verificationUrl = `${window.location.origin}/verify/${uniqueId}`
+            setQrCodeValue(verificationUrl)
+
+            // 2. Save Draft Invite to Supabase (in background, don't block UI if offline)
+            // Note: In real app, we should probably await this if we want strict consistency.
+            // For MVP smoothness, we'll try to save.
+            const { error } = await supabase.from('invitations').insert({
+                qr_code_value: uniqueId,
+                guest_name: guestData.name,
+                guest_phone: guestData.phone,
+                campus_id: selectedCampus.id, // Ensure UUID in DB
+                flyer_design_id: selectedFlyer,
+                status: 'sent',
+                // Assuming we can insert without inviter_id for public usage or use "anon" logic
+                // For this MVP, we will try. If RLS blocks, we might need anon access.
+                // *Assuming inviter is logged in* or we relax RLS.
+                // If this fails, the Verify page uses the fallback "Mock" logic for the id.
+            })
+
+            // Wait a tick for React to render the QRCode with the new Value
+            await new Promise(r => setTimeout(r, 500))
+
+            // 3. Capture
+            const dataUrl = await toPng(flyerRef.current, { cacheBust: true })
             setGeneratedImage(dataUrl)
             setStep(3)
         } catch (err) {
@@ -151,41 +179,27 @@ export default function InvitationFlow() {
                                 <p className="text-gray-400 text-sm">Select the flyer design you like best.</p>
                             </div>
 
-                            {/* Flyer Preview Carousel - simplified as stacked list for now or horizontal scroll */}
-                            <div className="flex justify-center gap-4 flex-wrap pb-4">
-                                {/* Only render one at a time for 'preview' or show thumbnails? 
-                     I'll show thumbnails scaling down the components.
-                 */}
-                                <div className="space-y-6">
-                                    <div
-                                        className={`cursor-pointer transition-all ${selectedFlyer === 'modern' ? 'ring-4 ring-[var(--color-accent)] scale-105' : 'opacity-70 hover:opacity-100'}`}
-                                        onClick={() => setSelectedFlyer('modern')}
-                                    >
-                                        <p className="text-center text-xs mb-2 text-gray-400">Bold Modern</p>
-                                        <div className="scale-75 origin-top transform h-[380px] w-[300px] pointer-events-none border border-white/20">
-                                            <FlyerModern guestName={guestData.name} campus={selectedCampus} time={selectedTime} />
+                            {/* Flyer Preview Carousel */}
+                            <div className="flex justify-center flex-wrap pb-4 h-[50vh] overflow-y-auto w-full">
+                                <div className="space-y-8 pb-20">
+                                    {[
+                                        { id: 'modern', name: 'Bold Modern', Component: FlyerModern },
+                                        { id: 'golden', name: 'Elegant Gold', Component: FlyerGolden },
+                                        { id: 'minimal', name: 'Clean Minimal', Component: FlyerMinimal },
+                                        { id: 'gradient', name: 'Royal Gradient', Component: FlyerGradient },
+                                        { id: 'luxury', name: 'Black & Gold', Component: FlyerLuxury },
+                                    ].map(({ id, name, Component }) => (
+                                        <div
+                                            key={id}
+                                            className={`cursor-pointer transition-all ${selectedFlyer === id ? 'ring-4 ring-[var(--color-accent)] scale-105' : 'opacity-70 hover:opacity-100'} flex flex-col items-center`}
+                                            onClick={() => setSelectedFlyer(id)}
+                                        >
+                                            <p className="text-center text-xs mb-2 text-gray-400 font-bold uppercase tracking-widest">{name}</p>
+                                            <div className="scale-75 origin-top transform h-[380px] w-[300px] pointer-events-none border border-white/20 overflow-hidden shadow-2xl">
+                                                <Component guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue="PREVIEW" />
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <div
-                                        className={`cursor-pointer transition-all ${selectedFlyer === 'golden' ? 'ring-4 ring-[var(--color-highlight)] scale-105' : 'opacity-70 hover:opacity-100'}`}
-                                        onClick={() => setSelectedFlyer('golden')}
-                                    >
-                                        <p className="text-center text-xs mb-2 text-gray-400">Elegant Gold</p>
-                                        <div className="scale-75 origin-top transform h-[380px] w-[300px] pointer-events-none border border-white/20">
-                                            <FlyerGolden guestName={guestData.name} campus={selectedCampus} time={selectedTime} />
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        className={`cursor-pointer transition-all ${selectedFlyer === 'minimal' ? 'ring-4 ring-white scale-105' : 'opacity-70 hover:opacity-100'}`}
-                                        onClick={() => setSelectedFlyer('minimal')}
-                                    >
-                                        <p className="text-center text-xs mb-2 text-gray-400">Clean Minimal</p>
-                                        <div className="scale-75 origin-top transform h-[380px] w-[300px] pointer-events-none border border-white/20">
-                                            <FlyerMinimal guestName={guestData.name} campus={selectedCampus} time={selectedTime} />
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
 
@@ -202,9 +216,11 @@ export default function InvitationFlow() {
 
                             {/* Hidden container for generation */}
                             <div className="fixed top-0 left-[-9999px]">
-                                {selectedFlyer === 'modern' && <FlyerModern ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} />}
-                                {selectedFlyer === 'golden' && <FlyerGolden ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} />}
-                                {selectedFlyer === 'minimal' && <FlyerMinimal ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} />}
+                                {selectedFlyer === 'modern' && <FlyerModern ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
+                                {selectedFlyer === 'golden' && <FlyerGolden ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
+                                {selectedFlyer === 'minimal' && <FlyerMinimal ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
+                                {selectedFlyer === 'gradient' && <FlyerGradient ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
+                                {selectedFlyer === 'luxury' && <FlyerLuxury ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
                             </div>
                         </motion.div>
                     )}

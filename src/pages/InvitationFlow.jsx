@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toPng } from 'html-to-image'
 import { Layout } from '../components/Layout'
@@ -11,6 +11,7 @@ import { FlyerMinimal } from '../components/flyers/FlyerMinimal'
 import { FlyerGradient } from '../components/flyers/FlyerGradient'
 import { FlyerLuxury } from '../components/flyers/FlyerLuxury'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 
 // Mock Campuses if DB fetch fails
 const MOCK_CAMPUSES = [
@@ -20,6 +21,7 @@ const MOCK_CAMPUSES = [
 ]
 
 export default function InvitationFlow() {
+    const { user } = useAuth()
     const [ step, setStep ] = useState(1)
     const [ guestData, setGuestData ] = useState({ name: '', phone: '', location: '' })
     const [ selectedCampus, setSelectedCampus ] = useState(MOCK_CAMPUSES[ 0 ])
@@ -44,21 +46,22 @@ export default function InvitationFlow() {
             const verificationUrl = `${window.location.origin}/verify/${uniqueId}`
             setQrCodeValue(verificationUrl)
 
-            // 2. Save Draft Invite to Supabase (in background, don't block UI if offline)
-            // Note: In real app, we should probably await this if we want strict consistency.
-            // For MVP smoothness, we'll try to save.
+            // 2. Save Invite to Supabase with authenticated user as inviter
             const { error } = await supabase.from('invitations').insert({
                 qr_code_value: uniqueId,
                 guest_name: guestData.name,
                 guest_phone: guestData.phone,
-                campus_id: selectedCampus.id, // Ensure UUID in DB
+                campus_id: selectedCampus.id,
                 flyer_design_id: selectedFlyer,
                 status: 'sent',
-                // Assuming we can insert without inviter_id for public usage or use "anon" logic
-                // For this MVP, we will try. If RLS blocks, we might need anon access.
-                // *Assuming inviter is logged in* or we relax RLS.
-                // If this fails, the Verify page uses the fallback "Mock" logic for the id.
+                inviter_id: user?.id, // Use authenticated user's ID
+                delivery_method: 'download', // Default to download, can be updated when WhatsApp is clicked
             })
+
+            if (error) {
+                console.error('Error saving invitation:', error)
+                // Continue anyway - the invitation will still work for the guest
+            }
 
             // Wait a tick for React to render the QRCode with the new Value
             await new Promise(r => setTimeout(r, 500))
@@ -145,7 +148,7 @@ export default function InvitationFlow() {
                                             <button
                                                 key={time}
                                                 onClick={() => setSelectedTime(time)}
-                                                className={`px-3 py-1 rounded-md text-sm border transition-colors ${selectedTime === time ? 'border-[var(--color-highlight)] text-[var(--color-highlight)] bg-[var(--color-highlight)]/10' : 'border-white/20 text-gray-400 hover:border-white/40'}`}
+                                                className={`cursor-pointer px-3 py-1 rounded-md text-sm border transition-colors ${selectedTime === time ? 'border-[var(--color-highlight)] text-[var(--color-highlight)] bg-[var(--color-highlight)]/10' : 'border-white/20 text-gray-400 hover:border-white/40'}`}
                                             >
                                                 {time}
                                             </button>

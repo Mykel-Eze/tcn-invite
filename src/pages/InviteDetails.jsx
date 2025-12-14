@@ -1,23 +1,38 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function InviteDetails() {
     const { id } = useParams() // This matches the QR code value
+    const { profile, loading: authLoading } = useAuth()
+    const navigate = useNavigate()
     const [ invite, setInvite ] = useState(null)
     const [ loading, setLoading ] = useState(true)
     const [ error, setError ] = useState(null)
+    const [ attendanceConfirmed, setAttendanceConfirmed ] = useState(false)
 
     useEffect(() => {
         async function fetchInvite() {
             if (!id) return;
+
+            // Wait for auth to load
+            if (authLoading) return;
+
+            // Check if user is admin or pcu_host
+            if (!profile || (profile.role !== 'admin' && profile.role !== 'pcu_host')) {
+                setError("Access denied. Only admins and PCU hosts can verify invitations.")
+                setLoading(false)
+                return
+            }
+
             setLoading(true)
 
             // 1. Try fetching from Supabase
-            const { data, error } = await supabase
+            const { data, error: fetchError } = await supabase
                 .from('invitations')
                 .select('*, inviter:profiles(full_name, email), campus:campuses(name, address)')
                 .eq('qr_code_value', id)
@@ -25,28 +40,37 @@ export default function InviteDetails() {
 
             if (data) {
                 setInvite(data)
-            } else {
-                // 2. If not found, check if it's a "mock" ID from the MVP flow
-                // For MVP demonstration, if we used a URL without saving to DB, we can't show details.
-                // BUT, if I update InvitationFlow to save draft, it works.
-                // Fallback: If ID is "sample" or looks like a test, show mock.
-                if (id === 'sample' || id.length > 5) {
-                    // Mock data for display purposes if DB is empty/connection fails
-                    setInvite({
-                        guest_name: 'Guest',
-                        campus: { name: 'TCN Campus', address: '123 Church St' },
-                        inviter: { full_name: 'TCN Member', email: 'member@tcn.org' },
-                        created_at: new Date().toISOString()
-                    })
+
+                // 2. Auto-confirm attendance if not already attended
+                if (data.status !== 'attended') {
+                    const { error: updateError } = await supabase
+                        .from('invitations')
+                        .update({
+                            status: 'attended',
+                            attended_at: new Date().toISOString()
+                        })
+                        .eq('id', data.id)
+
+                    if (!updateError) {
+                        setAttendanceConfirmed(true)
+                        // Update local state
+                        setInvite({
+                            ...data,
+                            status: 'attended',
+                            attended_at: new Date().toISOString()
+                        })
+                    }
                 } else {
-                    setError("Invitation not found.")
+                    setAttendanceConfirmed(true)
                 }
+            } else {
+                setError("Invitation not found.")
             }
             setLoading(false)
         }
 
         fetchInvite()
-    }, [ id ])
+    }, [ id, profile, authLoading ])
 
     if (loading) return (
         <Layout>
@@ -59,8 +83,13 @@ export default function InviteDetails() {
     if (error || !invite) return (
         <Layout>
             <div className="text-center mt-10 space-y-4">
-                <h1 className="text-xl font-bold text-red-500">Invalid Invitation</h1>
-                <p className="text-gray-400">We couldn't find this invitation.</p>
+                <div className="text-6xl mb-4">🔒</div>
+                <h1 className="text-xl font-bold text-red-500">
+                    {error === "Access denied. Only admins and PCU hosts can verify invitations."
+                        ? "Access Denied"
+                        : "Invalid Invitation"}
+                </h1>
+                <p className="text-gray-400">{error || "We couldn't find this invitation."}</p>
                 <Link to="/"><Button>Go Home</Button></Link>
             </div>
         </Layout>
@@ -71,10 +100,24 @@ export default function InviteDetails() {
             <div className="w-full max-w-sm mx-auto space-y-8 mt-4">
                 {/* Status Badge */}
                 <div className="flex justify-center">
-                    <span className="px-4 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/50 text-sm font-bold uppercase tracking-widest">
-                        Valid Invitation
+                    <span className={`px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest ${
+                        invite.status === 'attended'
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                            : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50'
+                    }`}>
+                        {invite.status === 'attended' ? 'Attendance Confirmed' : 'Valid Invitation'}
                     </span>
                 </div>
+
+                {/* Attendance Confirmation Message */}
+                {attendanceConfirmed && (
+                    <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-center">
+                        <p className="text-green-400 font-semibold">✓ Attendance has been confirmed!</p>
+                        <p className="text-sm text-gray-400 mt-1">
+                            {new Date(invite.attended_at).toLocaleString()}
+                        </p>
+                    </div>
+                )}
 
                 {/* Main Details */}
                 <div className="text-center space-y-2">
@@ -115,9 +158,19 @@ export default function InviteDetails() {
                     </div>
                 </div>
 
-                <div className="pt-8">
-                    <Button className="w-full bg-white text-black hover:bg-gray-200" onClick={() => window.location.href = '/'}>
-                        Create Your Own Invite
+                <div className="pt-8 flex gap-3">
+                    <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => navigate('/pcu-checkin')}
+                    >
+                        Scan Next
+                    </Button>
+                    <Button
+                        className="flex-1"
+                        onClick={() => navigate('/admin')}
+                    >
+                        Admin Dashboard
                     </Button>
                 </div>
             </div>

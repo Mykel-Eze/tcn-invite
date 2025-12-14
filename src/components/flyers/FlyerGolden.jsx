@@ -18,7 +18,7 @@ const FlyerGolden = React.forwardRef(({ guestName, campus, time, qrCodeValue }, 
                 </div>
 
                 <div>
-                    <p className="text-xs tracking-[0.2em] text-gray-400 mb-2 uppercase">Honored Guest</p>
+                    <p className="text-xs tracking-[0.2em] text-gray-400 mb-3 uppercase">Honored Guest</p>
                     <h2 className="text-xl font-medium text-white font-serif italic text-pretty">
                         {guestName || "Guest Name"}
                     </h2>
@@ -30,7 +30,7 @@ const FlyerGolden = React.forwardRef(({ guestName, campus, time, qrCodeValue }, 
                     <p className="text-xs text-gray-400 max-w-[200px] mx-auto">{campus?.address || "Address Here"}</p>
                 </div>
 
-                <div className="inline-block px-6 py-1 border border-[var(--color-highlight)] rounded-full text-[var(--color-highlight)] text-sm">
+                <div className="inline-block px-4 py-1 border border-[var(--color-highlight)] rounded-full text-[var(--color-highlight)] text-sm">
                     {time || "9:00 AM"}
                 </div>
             </div>

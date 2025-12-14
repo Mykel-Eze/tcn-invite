@@ -28,16 +28,22 @@ export const AuthProvider = ({ children }) => {
                 hasUser: !!session?.user
             })
 
-            if (session?.user) {
-                console.log('✓ Setting user:', session.user.id)
-                setUser(session.user)
-                await fetchProfile(session.user.id)
-            } else {
-                console.log('⚠️ No session, clearing user')
-                setUser(null)
-                setProfile(null)
+            try {
+                if (session?.user) {
+                    console.log('✓ Setting user:', session.user.id)
+                    setUser(session.user)
+                    await fetchProfile(session.user.id)
+                } else {
+                    console.log('⚠️ No session, clearing user')
+                    setUser(null)
+                    setProfile(null)
+                }
+            } catch (error) {
+                console.error('❌ Error in auth state change handler:', error)
+            } finally {
+                console.log('✓ Auth state change complete, setting loading to false')
+                setLoading(false)
             }
-            setLoading(false)
         })
 
         return () => {
@@ -80,28 +86,41 @@ export const AuthProvider = ({ children }) => {
     const fetchProfile = async (userId) => {
         try {
             console.log('📋 Fetching profile for user:', userId)
-            const { data, error } = await supabase
+
+            // Create a timeout promise
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Profile fetch timeout after 5 seconds')), 5000)
+            })
+
+            // Race between the actual fetch and the timeout
+            const profilePromise = supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
                 .single()
 
+            const { data, error } = await Promise.race([profilePromise, timeoutPromise])
+
             if (error) {
                 console.error('❌ Error fetching profile:', error)
                 console.error('❌ Error code:', error.code)
+                console.error('❌ Error message:', error.message)
 
                 // If profile doesn't exist (PGRST116 is "not found" error)
                 if (error.code === 'PGRST116') {
                     console.error('❌ Profile not found for user. User may need to sign up again.')
-                    // Don't throw - just set profile to null and let user stay logged in
-                    // They might be in the middle of signup process
+                    console.error('❌ This could mean:')
+                    console.error('   1. The database trigger did not create the profile')
+                    console.error('   2. The profile was deleted')
+                    console.error('   3. RLS policies are blocking access')
+                    // Don't throw - just set profile to null
                     setProfile(null)
                     return null
                 }
                 throw error
             }
 
-            console.log('✓ Profile fetched:', {
+            console.log('✓ Profile fetched successfully:', {
                 id: data.id,
                 email: data.email,
                 full_name: data.full_name,
@@ -111,6 +130,17 @@ export const AuthProvider = ({ children }) => {
             return data
         } catch (error) {
             console.error('❌ Error in fetchProfile:', error)
+            console.error('❌ Error type:', error.constructor.name)
+            console.error('❌ Error message:', error.message)
+
+            if (error.message?.includes('timeout')) {
+                console.error('❌ Profile fetch timed out - possible issues:')
+                console.error('   1. Network connectivity problem')
+                console.error('   2. RLS policies blocking the query')
+                console.error('   3. Database is not responding')
+                console.error('   4. Supabase service issue')
+            }
+
             setProfile(null)
             return null
         }

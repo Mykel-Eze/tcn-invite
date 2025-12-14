@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useRef, useState } from 'react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 import { Button } from './ui/Button'
@@ -20,7 +21,7 @@ export function QRScanner({ onScan, onError }) {
                 setScanning(false)
             },
             (errorMessage) => {
-                // console.error(errorMessage) 
+                console.error(errorMessage) 
                 // ignore errors during scanning
             }
         )
@@ -32,6 +33,7 @@ export function QRScanner({ onScan, onError }) {
             try {
                 if (scannerRef.current) scannerRef.current.clear()
             } catch (e) {
+                console.error('Error clearing QR scanner:', e)
                 // ignore cleanup errors
             }
         }

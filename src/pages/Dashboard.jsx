@@ -1,25 +1,78 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Search, Plus, ScanLine } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
 export default function Dashboard() {
-    const { profile } = useAuth()
+    const { profile, user } = useAuth()
     const isAdmin = profile?.role === 'admin' || profile?.role === 'pcu_host'
+    const [recentInvites, setRecentInvites] = useState([])
+    const [loadingInvites, setLoadingInvites] = useState(true)
 
-    // Get user initials
-    // const getInitials = () => {
-    //     if (!profile?.full_name) return 'M'
-    //     return profile.full_name
-    //         .split(' ')
-    //         .map(name => name[0])
-    //         .join('')
-    //         .toUpperCase()
-    //         .substring(0, 2)
-    // }
+    // Fetch recent invites from database
+    useEffect(() => {
+        const fetchRecentInvites = async () => {
+            if (!user?.id) return
+
+            try {
+                console.log('📊 Fetching recent invites for user:', user.id)
+                const { data, error } = await supabase
+                    .from('invitations')
+                    .select(`
+                        *,
+                        campuses (
+                            name
+                        )
+                    `)
+                    .eq('inviter_id', user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(5)
+
+                if (error) {
+                    console.error('❌ Error fetching invites:', error)
+                    throw error
+                }
+
+                console.log('✓ Recent invites fetched:', data)
+                setRecentInvites(data || [])
+            } catch (error) {
+                console.error('❌ Failed to fetch recent invites:', error)
+            } finally {
+                setLoadingInvites(false)
+            }
+        }
+
+        fetchRecentInvites()
+    }, [user])
+
+    // Get guest initials
+    const getGuestInitials = (name) => {
+        if (!name) return '?'
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 2)
+    }
+
+    // Get status badge color
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'sent':
+                return 'bg-yellow-500/10 text-yellow-500'
+            case 'attended':
+                return 'bg-green-500/10 text-green-500'
+            case 'pending':
+                return 'bg-blue-500/10 text-blue-500'
+            default:
+                return 'bg-gray-500/10 text-gray-500'
+        }
+    }
 
     return (
         <Layout>
@@ -65,22 +118,35 @@ export default function Dashboard() {
                 <div className="space-y-4">
                     <h2 className="text-lg font-bold">Recent Invites</h2>
 
-                    {[ 1, 2, 3 ].map((i) => (
-                        <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-full bg-linear-to-br from-gray-800 to-black flex items-center justify-center text-xs font-bold text-gray-500">
-                                    JD
-                                </div>
-                                <div>
-                                    <p className="font-medium text-sm">John Doe</p>
-                                    <p className="text-xs text-gray-500">TCN Ikeja • 9:00 AM</p>
-                                </div>
-                            </div>
-                            <div className="text-xs px-2 py-1 rounded bg-yellow-500/10 text-yellow-500">
-                                Sent
-                            </div>
+                    {loadingInvites ? (
+                        <div className="text-center py-8 text-gray-400">
+                            Loading invites...
                         </div>
-                    ))}
+                    ) : recentInvites.length === 0 ? (
+                        <div className="text-center py-8 text-gray-400">
+                            <p>No invites yet.</p>
+                            <p className="text-sm mt-2">Create your first invitation to get started!</p>
+                        </div>
+                    ) : (
+                        recentInvites.map((invite) => (
+                            <div key={invite.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-full bg-linear-to-br from-gray-800 to-black flex items-center justify-center text-xs font-bold text-gray-400">
+                                        {getGuestInitials(invite.guest_name)}
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-sm">{invite.guest_name}</p>
+                                        <p className="text-xs text-gray-500">
+                                            {invite.campuses?.name || 'Unknown Campus'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className={`text-xs px-2 py-1 rounded capitalize ${getStatusColor(invite.status)}`}>
+                                    {invite.status}
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </Layout>

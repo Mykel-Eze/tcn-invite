@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react'
+/* eslint-disable no-unused-vars */
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toPng } from 'html-to-image'
 import { Layout } from '../components/Layout'
@@ -13,23 +14,53 @@ import { FlyerLuxury } from '../components/flyers/FlyerLuxury'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
-// Mock Campuses if DB fetch fails
-const MOCK_CAMPUSES = [
-    { id: '1', name: 'TCN Ikeja', address: '123 Allen Avenue, Ikeja', service_times: [ '9:00 AM', '11:00 AM' ] },
-    { id: '2', name: 'TCN Lekki', address: 'Admiralty Way, Lekki', service_times: [ '10:00 AM' ] },
-    { id: '3', name: 'TCN Abuja', address: 'Central Business District', service_times: [ '9:00 AM' ] },
-]
-
 export default function InvitationFlow() {
     const { user } = useAuth()
     const [ step, setStep ] = useState(1)
     const [ guestData, setGuestData ] = useState({ name: '', phone: '', location: '' })
-    const [ selectedCampus, setSelectedCampus ] = useState(MOCK_CAMPUSES[ 0 ])
-    const [ selectedTime, setSelectedTime ] = useState(MOCK_CAMPUSES[ 0 ].service_times[ 0 ])
+    const [ campuses, setCampuses ] = useState([])
+    const [ selectedCampus, setSelectedCampus ] = useState(null)
+    const [ selectedTime, setSelectedTime ] = useState('')
     const [ selectedFlyer, setSelectedFlyer ] = useState(null) // 'modern', 'golden', 'minimal'
     const [ generatedImage, setGeneratedImage ] = useState(null)
+    const [ loading, setLoading ] = useState(true)
 
     const flyerRef = useRef(null)
+
+    // Fetch campuses from database
+    useEffect(() => {
+        const fetchCampuses = async () => {
+            try {
+                console.log('📍 Fetching campuses from database...')
+                const { data, error } = await supabase
+                    .from('campuses')
+                    .select('*')
+                    .order('name')
+
+                if (error) {
+                    console.error('❌ Error fetching campuses:', error)
+                    throw error
+                }
+
+                console.log('✓ Campuses fetched:', data)
+                setCampuses(data)
+
+                // Set default selections
+                if (data && data.length > 0) {
+                    setSelectedCampus(data[0])
+                    setSelectedTime(data[0].service_times?.[0] || '')
+                }
+            } catch (error) {
+                console.error('❌ Failed to fetch campuses:', error)
+                // Show error to user
+                alert('Failed to load campuses. Please refresh the page.')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchCampuses()
+    }, [])
 
     const handleInputChange = (e) => {
         setGuestData({ ...guestData, [ e.target.name ]: e.target.value })
@@ -126,29 +157,35 @@ export default function InvitationFlow() {
 
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium text-white/80 block ml-1">Select Campus</label>
-                                    <select
-                                        className="flex h-12 w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] [&>option]:bg-black"
-                                        value={selectedCampus.id}
-                                        onChange={(e) => {
-                                            const campus = MOCK_CAMPUSES.find(c => c.id === e.target.value)
-                                            setSelectedCampus(campus)
-                                            setSelectedTime(campus.service_times[ 0 ])
-                                        }}
-                                    >
-                                        {MOCK_CAMPUSES.map(c => (
-                                            <option key={c.id} value={c.id}>{c.name}</option>
-                                        ))}
-                                    </select>
+                                    {loading ? (
+                                        <div className="flex h-12 w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 items-center text-sm text-gray-400">
+                                            Loading campuses...
+                                        </div>
+                                    ) : (
+                                        <select
+                                            className="flex h-12 w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) [&>option]:bg-black"
+                                            value={selectedCampus?.id || ''}
+                                            onChange={(e) => {
+                                                const campus = campuses.find(c => c.id === e.target.value)
+                                                setSelectedCampus(campus)
+                                                setSelectedTime(campus?.service_times?.[0] || '')
+                                            }}
+                                        >
+                                            {campuses.map(c => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))}
+                                        </select>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium text-white/80 block ml-1">Service Time</label>
-                                    <div className="flex gap-2">
-                                        {selectedCampus.service_times.map(time => (
+                                    <div className="flex gap-2 flex-wrap">
+                                        {selectedCampus?.service_times?.map(time => (
                                             <button
                                                 key={time}
                                                 onClick={() => setSelectedTime(time)}
-                                                className={`cursor-pointer px-3 py-1 rounded-md text-sm border transition-colors ${selectedTime === time ? 'border-[var(--color-highlight)] text-[var(--color-highlight)] bg-[var(--color-highlight)]/10' : 'border-white/20 text-gray-400 hover:border-white/40'}`}
+                                                className={`cursor-pointer px-3 py-1 rounded-md text-sm border transition-colors ${selectedTime === time ? 'border-(--color-highlight) text-(--color-highlight) bg-(--color-highlight)/10' : 'border-white/20 text-gray-400 hover:border-white/40'}`}
                                             >
                                                 {time}
                                             </button>
@@ -159,9 +196,9 @@ export default function InvitationFlow() {
                                 <Button
                                     className="w-full mt-4"
                                     onClick={() => {
-                                        if (guestData.name) setStep(2)
+                                        if (guestData.name && selectedCampus) setStep(2)
                                     }}
-                                    disabled={!guestData.name}
+                                    disabled={!guestData.name || !selectedCampus || loading}
                                 >
                                     Next: Select Design
                                 </Button>
@@ -182,9 +219,9 @@ export default function InvitationFlow() {
                                 <p className="text-gray-400 text-sm">Select the flyer design you like best.</p>
                             </div>
 
-                            {/* Flyer Preview Carousel */}
-                            <div className="flex justify-center flex-wrap pb-4 h-[50vh] overflow-y-auto w-full">
-                                <div className="space-y-8 pb-20">
+                            {/* Flyer Preview Carousel - Vertical Scroll */}
+                            <div className="w-full overflow-y-auto max-h-[60vh] pb-[60px] px-4">
+                                <div className="space-y-8">
                                     {[
                                         { id: 'modern', name: 'Bold Modern', Component: FlyerModern },
                                         { id: 'golden', name: 'Elegant Gold', Component: FlyerGolden },
@@ -194,11 +231,11 @@ export default function InvitationFlow() {
                                     ].map(({ id, name, Component }) => (
                                         <div
                                             key={id}
-                                            className={`cursor-pointer transition-all ${selectedFlyer === id ? 'ring-4 ring-[var(--color-accent)] scale-105' : 'opacity-70 hover:opacity-100'} flex flex-col items-center`}
+                                            className={`cursor-pointer transition-all ${selectedFlyer === id ? 'p-4 ring-4 ring-(--color-accent) scale-105' : 'opacity-70 hover:opacity-100'} flex flex-col items-center`}
                                             onClick={() => setSelectedFlyer(id)}
                                         >
-                                            <p className="text-center text-xs mb-2 text-gray-400 font-bold uppercase tracking-widest">{name}</p>
-                                            <div className="scale-75 origin-top transform h-[380px] w-[300px] pointer-events-none border border-white/20 overflow-hidden shadow-2xl">
+                                            <p className="text-center text-xs mb-3 text-gray-400 font-bold uppercase tracking-widest">{name}</p>
+                                            <div className="w-full max-w-[300px] border border-white/20 rounded-lg overflow-hidden shadow-2xl bg-black">
                                                 <Component guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue="PREVIEW" />
                                             </div>
                                         </div>

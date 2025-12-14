@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Card } from '../components/ui/Card'
+import logo from '../assets/images/tcn_icon_white.png'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -78,7 +79,7 @@ export default function Login() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <img
-                        src="/tcn_logo.png"
+                        src={logo}
                         alt="TCN Logo"
                         className="h-16 mx-auto mb-4"
                     />

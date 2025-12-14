@@ -47,14 +47,32 @@ export const AuthProvider = ({ children }) => {
 
     const checkUser = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession()
+            console.log('🔍 Checking user session...')
+            const { data: { session }, error } = await supabase.auth.getSession()
+
+            if (error) {
+                console.error('❌ Error getting session:', error)
+                setUser(null)
+                setProfile(null)
+                setLoading(false)
+                return
+            }
+
             if (session?.user) {
+                console.log('✓ Session found for user:', session.user.id)
                 setUser(session.user)
                 await fetchProfile(session.user.id)
+            } else {
+                console.log('⚠️ No active session found')
+                setUser(null)
+                setProfile(null)
             }
         } catch (error) {
-            console.error('Error checking user:', error)
+            console.error('❌ Error checking user:', error)
+            setUser(null)
+            setProfile(null)
         } finally {
+            console.log('✓ Setting loading to false')
             setLoading(false)
         }
     }
@@ -70,6 +88,16 @@ export const AuthProvider = ({ children }) => {
 
             if (error) {
                 console.error('❌ Error fetching profile:', error)
+                console.error('❌ Error code:', error.code)
+
+                // If profile doesn't exist (PGRST116 is "not found" error)
+                if (error.code === 'PGRST116') {
+                    console.error('❌ Profile not found for user. User may need to sign up again.')
+                    // Don't throw - just set profile to null and let user stay logged in
+                    // They might be in the middle of signup process
+                    setProfile(null)
+                    return null
+                }
                 throw error
             }
 
@@ -80,8 +108,11 @@ export const AuthProvider = ({ children }) => {
                 role: data.role
             })
             setProfile(data)
+            return data
         } catch (error) {
             console.error('❌ Error in fetchProfile:', error)
+            setProfile(null)
+            return null
         }
     }
 
@@ -98,18 +129,22 @@ export const AuthProvider = ({ children }) => {
                     data: {
                         full_name: fullName,
                         role: role,
-                    }
+                    },
+                    emailRedirectTo: `${window.location.origin}/auth/callback`
                 }
             })
 
             console.log('🔵 [2/5] Auth response:', {
                 hasUser: !!authData?.user,
                 hasSession: !!authData?.session,
-                hasError: !!authError
+                hasError: !!authError,
+                userEmail: authData?.user?.email
             })
 
             if (authError) {
                 console.error('❌ Auth error:', authError)
+                console.error('❌ Auth error code:', authError.code)
+                console.error('❌ Auth error message:', authError.message)
                 throw authError
             }
 
@@ -120,11 +155,17 @@ export const AuthProvider = ({ children }) => {
             }
 
             console.log('✓ [2/5] User created:', authData.user.id)
+            console.log('✓ User email:', authData.user.email)
+            console.log('✓ Email confirmed at:', authData.user.email_confirmed_at || 'Not confirmed yet')
             console.log('✓ Metadata sent:', { full_name: fullName, role })
 
             // Check if email confirmation is required
             if (!authData.session) {
                 console.log('⚠️ Email confirmation required!')
+                console.log('📧 Confirmation email should be sent to:', authData.user.email)
+                console.log('📧 Check your inbox and spam folder')
+                console.log('📧 Redirect URL configured:', `${window.location.origin}/auth/callback`)
+                console.log('📧 If no email received, check Supabase Dashboard → Authentication → Settings → Email')
                 return {
                     data: authData,
                     error: null,
@@ -219,12 +260,20 @@ export const AuthProvider = ({ children }) => {
 
     const signOut = async () => {
         try {
+            console.log('🚪 Signing out...')
             const { error } = await supabase.auth.signOut()
-            if (error) throw error
+            if (error) {
+                console.error('❌ Error during signOut:', error)
+                throw error
+            }
+            console.log('✓ Successfully signed out')
             setUser(null)
             setProfile(null)
         } catch (error) {
-            console.error('Error signing out:', error)
+            console.error('❌ Error signing out:', error)
+            // Force clear state even if signOut fails
+            setUser(null)
+            setProfile(null)
         }
     }
 

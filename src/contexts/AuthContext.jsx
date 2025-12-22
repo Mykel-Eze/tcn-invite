@@ -87,33 +87,18 @@ export const AuthProvider = ({ children }) => {
         try {
             console.log('📋 Fetching profile for user:', userId)
 
-            // Create a timeout promise
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Profile fetch timeout after 5 seconds')), 5000)
-            })
-
-            // Race between the actual fetch and the timeout
-            const profilePromise = supabase
+            const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
                 .single()
 
-            const { data, error } = await Promise.race([profilePromise, timeoutPromise])
-
             if (error) {
                 console.error('❌ Error fetching profile:', error)
-                console.error('❌ Error code:', error.code)
-                console.error('❌ Error message:', error.message)
 
                 // If profile doesn't exist (PGRST116 is "not found" error)
                 if (error.code === 'PGRST116') {
-                    console.error('❌ Profile not found for user. User may need to sign up again.')
-                    console.error('❌ This could mean:')
-                    console.error('   1. The database trigger did not create the profile')
-                    console.error('   2. The profile was deleted')
-                    console.error('   3. RLS policies are blocking access')
-                    // Don't throw - just set profile to null
+                    console.error('❌ Profile not found for user.')
                     setProfile(null)
                     return null
                 }
@@ -130,17 +115,6 @@ export const AuthProvider = ({ children }) => {
             return data
         } catch (error) {
             console.error('❌ Error in fetchProfile:', error)
-            console.error('❌ Error type:', error.constructor.name)
-            console.error('❌ Error message:', error.message)
-
-            if (error.message?.includes('timeout')) {
-                console.error('❌ Profile fetch timed out - possible issues:')
-                console.error('   1. Network connectivity problem')
-                console.error('   2. RLS policies blocking the query')
-                console.error('   3. Database is not responding')
-                console.error('   4. Supabase service issue')
-            }
-
             setProfile(null)
             return null
         }

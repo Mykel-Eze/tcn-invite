@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext({})
@@ -17,10 +17,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        // Check active session
-        checkUser()
-
-        // Listen for auth changes
+        // Listen for auth changes (this also fires immediately with current session)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('🔄 Auth state changed:', {
                 event,
@@ -40,6 +37,9 @@ export const AuthProvider = ({ children }) => {
                 }
             } catch (error) {
                 console.error('❌ Error in auth state change handler:', error)
+                // Clear user state on error to prevent infinite loading
+                setUser(null)
+                setProfile(null)
             } finally {
                 console.log('✓ Auth state change complete, setting loading to false')
                 setLoading(false)
@@ -50,38 +50,6 @@ export const AuthProvider = ({ children }) => {
             subscription?.unsubscribe()
         }
     }, [])
-
-    const checkUser = async () => {
-        try {
-            console.log('🔍 Checking user session...')
-            const { data: { session }, error } = await supabase.auth.getSession()
-
-            if (error) {
-                console.error('❌ Error getting session:', error)
-                setUser(null)
-                setProfile(null)
-                setLoading(false)
-                return
-            }
-
-            if (session?.user) {
-                console.log('✓ Session found for user:', session.user.id)
-                setUser(session.user)
-                await fetchProfile(session.user.id)
-            } else {
-                console.log('⚠️ No active session found')
-                setUser(null)
-                setProfile(null)
-            }
-        } catch (error) {
-            console.error('❌ Error checking user:', error)
-            setUser(null)
-            setProfile(null)
-        } finally {
-            console.log('✓ Setting loading to false')
-            setLoading(false)
-        }
-    }
 
     const fetchProfile = async (userId) => {
         try {

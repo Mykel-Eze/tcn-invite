@@ -17,36 +17,64 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        // Listen for auth changes (this also fires immediately with current session)
+        console.log('🚀 AuthProvider mounted, setting up auth listener')
+        let mounted = true
+
+        // Safety timeout: if onAuthStateChange doesn't fire within 10 seconds, stop loading
+        const safetyTimeout = setTimeout(() => {
+            console.warn('⚠️ Auth initialization timeout - forcing loading to false')
+            if (mounted) {
+                setLoading(false)
+            }
+        }, 10000)
+
+        // Listen for auth changes (fires immediately with INITIAL_SESSION event)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('🔄 Auth state changed:', {
                 event,
                 hasSession: !!session,
-                hasUser: !!session?.user
+                hasUser: !!session?.user,
+                timestamp: new Date().toISOString()
             })
 
+            // Clear safety timeout since we got a response
+            clearTimeout(safetyTimeout)
+
+            if (!mounted) return
+
             try {
-                if (session?.user) {
+                if (event === 'SIGNED_OUT') {
+                    console.log('🚪 User signed out')
+                    setUser(null)
+                    setProfile(null)
+                } else if (session?.user) {
                     console.log('✓ Setting user:', session.user.id)
                     setUser(session.user)
                     await fetchProfile(session.user.id)
                 } else {
-                    console.log('⚠️ No session, clearing user')
+                    console.log('⚠️ No session found')
                     setUser(null)
                     setProfile(null)
                 }
             } catch (error) {
                 console.error('❌ Error in auth state change handler:', error)
-                // Clear user state on error to prevent infinite loading
-                setUser(null)
-                setProfile(null)
+                if (mounted) {
+                    setUser(null)
+                    setProfile(null)
+                }
             } finally {
-                console.log('✓ Auth state change complete, setting loading to false')
-                setLoading(false)
+                // Always set loading to false after handling auth state
+                if (mounted) {
+                    console.log('✓ Auth state handled, setting loading to false')
+                    setLoading(false)
+                }
             }
         })
 
         return () => {
+            console.log('🔚 AuthProvider unmounting, cleaning up')
+            mounted = false
+            clearTimeout(safetyTimeout)
             subscription?.unsubscribe()
         }
     }, [])
@@ -55,11 +83,19 @@ export const AuthProvider = ({ children }) => {
         try {
             console.log('📋 Fetching profile for user:', userId)
 
-            const { data, error } = await supabase
+            // Create a timeout promise (5 seconds)
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+            )
+
+            // Race between the fetch and timeout
+            const fetchPromise = supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
                 .single()
+
+            const { data, error } = await Promise.race([fetchPromise, timeoutPromise])
 
             if (error) {
                 console.error('❌ Error fetching profile:', error)

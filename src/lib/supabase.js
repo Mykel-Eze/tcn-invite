@@ -7,4 +7,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Supabase URL or Anon Key is missing. Please ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your .env.local file.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
+    },
+    global: {
+        headers: {
+            'x-application-name': 'tcn-invite'
+        }
+    }
+})

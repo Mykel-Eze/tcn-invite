@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { LogOut, User, Settings, LayoutDashboard } from 'lucide-react'
+import { LogOut, LayoutDashboard } from 'lucide-react'
 import logo from '../assets/images/tcn_icon_white.png'
 
 export function Layout({ children }) {
@@ -41,7 +41,17 @@ export function Layout({ children }) {
 
                     {/* User Menu */}
                     {user && profile && (
-                        <div className="relative">
+                        <div className="relative flex items-center gap-2">
+                            {/* Dashboard Quick Access for Admin */}
+                            {(profile.role === 'admin' || profile.role === 'pcu_host') && (
+                                <Link
+                                    to="/admin"
+                                    className="h-10 w-10 bg-white/10 hover:bg-white/20 cursor-pointer rounded-full flex items-center justify-center text-white transition-colors"
+                                    title="Admin Dashboard"
+                                >
+                                    <LayoutDashboard size={20} />
+                                </Link>
+                            )}
                             <button
                                 onClick={() => setShowMenu(!showMenu)}
                                 className="h-10 w-10 bg-(--color-accent) cursor-pointer rounded-full flex items-center justify-center font-bold text-white hover:opacity-80 transition-opacity"

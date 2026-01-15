@@ -17,7 +17,7 @@ import { useAuth } from '../contexts/AuthContext'
 export default function InvitationFlow() {
     const { user } = useAuth()
     const [ step, setStep ] = useState(1)
-    const [ guestData, setGuestData ] = useState({ name: '', phone: '', location: '' })
+    const [ guestData, setGuestData ] = useState({ name: '', phone: '', email: '', location: '' })
     const [ campuses, setCampuses ] = useState([])
     const [ selectedCampus, setSelectedCampus ] = useState(null)
     const [ selectedTime, setSelectedTime ] = useState('')
@@ -82,6 +82,7 @@ export default function InvitationFlow() {
                 qr_code_value: uniqueId,
                 guest_name: guestData.name,
                 guest_phone: guestData.phone,
+                guest_email: guestData.email || null,
                 campus_id: selectedCampus.id,
                 flyer_design_id: selectedFlyer,
                 status: 'sent',
@@ -152,6 +153,14 @@ export default function InvitationFlow() {
                                     label="Phone Number"
                                     placeholder="+234..."
                                     value={guestData.phone}
+                                    onChange={handleInputChange}
+                                />
+                                <Input
+                                    name="email"
+                                    label="Email (Optional)"
+                                    placeholder="e.g. john@example.com"
+                                    type="email"
+                                    value={guestData.email}
                                     onChange={handleInputChange}
                                 />
 
@@ -288,7 +297,7 @@ export default function InvitationFlow() {
                                 <Button variant="secondary" className="w-full" onClick={() => window.open(`https://wa.me/?text=Hi ${guestData.name}, I'd love to invite you to church at ${selectedCampus.name}!`, '_blank')}>
                                     Share on WhatsApp
                                 </Button>
-                                <Button variant="ghost" className="w-full" onClick={() => { setStep(1); setGuestData({ name: '', phone: '', location: '' }); }}>
+                                <Button variant="ghost" className="w-full" onClick={() => { setStep(1); setGuestData({ name: '', phone: '', email: '', location: '' }); }}>
                                     Create Another
                                 </Button>
                             </div>

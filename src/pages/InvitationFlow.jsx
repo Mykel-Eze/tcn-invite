@@ -47,8 +47,8 @@ export default function InvitationFlow() {
 
                 // Set default selections
                 if (data && data.length > 0) {
-                    setSelectedCampus(data[0])
-                    setSelectedTime(data[0].service_times?.[0] || '')
+                    setSelectedCampus(data[ 0 ])
+                    setSelectedTime(data[ 0 ].service_times?.[ 0 ] || '')
                 }
             } catch (error) {
                 console.error('❌ Failed to fetch campuses:', error)
@@ -116,6 +116,38 @@ export default function InvitationFlow() {
         link.click()
     }
 
+    const shareOnWhatsApp = async () => {
+        if (!generatedImage) return
+
+        try {
+            // Convert base64 to blob
+            const response = await fetch(generatedImage)
+            const blob = await response.blob()
+            const file = new File([ blob ], `invite-${guestData.name}.png`, { type: 'image/png' })
+
+            // Check if Web Share API is supported and can share files
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [ file ] })) {
+                await navigator.share({
+                    files: [ file ],
+                    title: 'Church Invitation',
+                    text: `Hi ${guestData.name}, I'd love to invite you to church at ${selectedCampus.name}!`
+                })
+            } else {
+                // Fallback: Download the image and prompt user to share manually
+                downloadImage()
+                alert('Image downloaded! Please open WhatsApp and manually attach the downloaded image.')
+            }
+        } catch (error) {
+            // User cancelled or error occurred
+            if (error.name !== 'AbortError') {
+                console.error('Error sharing:', error)
+                // Fallback to download
+                downloadImage()
+                alert('Could not share directly. Image downloaded! Please open WhatsApp and manually attach the downloaded image.')
+            }
+        }
+    }
+
     return (
         <Layout>
             <div className="flex-1 flex flex-col items-center">
@@ -177,7 +209,7 @@ export default function InvitationFlow() {
                                             onChange={(e) => {
                                                 const campus = campuses.find(c => c.id === e.target.value)
                                                 setSelectedCampus(campus)
-                                                setSelectedTime(campus?.service_times?.[0] || '')
+                                                setSelectedTime(campus?.service_times?.[ 0 ] || '')
                                             }}
                                         >
                                             {campuses.map(c => (
@@ -294,8 +326,8 @@ export default function InvitationFlow() {
                                 <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={downloadImage}>
                                     Download Image
                                 </Button>
-                                <Button variant="secondary" className="w-full" onClick={() => window.open(`https://wa.me/?text=Hi ${guestData.name}, I'd love to invite you to church at ${selectedCampus.name}!`, '_blank')}>
-                                    Share on WhatsApp
+                                <Button variant="secondary" className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white" onClick={shareOnWhatsApp}>
+                                    📱 Share on WhatsApp
                                 </Button>
                                 <Button variant="ghost" className="w-full" onClick={() => { setStep(1); setGuestData({ name: '', phone: '', email: '', location: '' }); }}>
                                     Create Another

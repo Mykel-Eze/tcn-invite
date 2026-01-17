@@ -1,13 +1,13 @@
 import React from "react"
 import { QRCodeCanvas } from "qrcode.react"
-import icon from "../../assets/images/tcn_icon.png"
+import icon from "../../assets/images/tcn_logo_white.png"
 
 const FlyerLuxury = React.forwardRef(({ guestName, campus, time, qrCodeValue }, ref) => {
     return (
         <div ref={ref} className="w-[300px] h-[500px] bg-black text-[#FFD700] relative flex flex-col items-center p-8 border-4 border double border-[#FFD700] shadow-2xl">
             {/* Icon */}
             <div className="absolute top-6">
-                <img src={icon} alt="Icon" className="w-10 h-10 opacity-80" />
+                <img src={icon} alt="Icon" className="w-auto h-10 opacity-80" />
             </div>
 
             <div className="mt-16 text-center w-full border-b border-[#FFD700]/30 pb-6">

@@ -1,6 +1,6 @@
 import React from "react"
 import { QRCodeCanvas } from "qrcode.react"
-import icon from "../../assets/images/tcn_icon.png"
+import icon from "../../assets/images/tcn_logo_black.png"
 
 const FlyerMinimal = React.forwardRef(({ guestName, campus, time, qrCodeValue }, ref) => {
     return (
@@ -11,7 +11,7 @@ const FlyerMinimal = React.forwardRef(({ guestName, campus, time, qrCodeValue },
 
             <div className="flex-1 flex flex-col justify-start space-y-8 pt-8 pl-4 z-10">
                 <div className="absolute top-8 right-8">
-                    <img src={icon} alt="Icon" className="w-8 h-8 opacity-20 grayscale" />
+                    <img src={icon} alt="Icon" className="w-auto h-8 opacity-70" />
                 </div>
                 <div>
                     <h1 className="text-5xl font-bold tracking-tighter leading-none text-black">

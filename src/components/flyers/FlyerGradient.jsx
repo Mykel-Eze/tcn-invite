@@ -1,6 +1,6 @@
 import React from "react"
 import { QRCodeCanvas } from "qrcode.react"
-import icon from "../../assets/images/tcn_icon.png"
+import icon from "../../assets/images/tcn_logo_white.png"
 
 const FlyerGradient = React.forwardRef(({ guestName, campus, time, qrCodeValue }, ref) => {
     return (
@@ -10,7 +10,7 @@ const FlyerGradient = React.forwardRef(({ guestName, campus, time, qrCodeValue }
 
             {/* Icon */}
             <div className="z-10 mt-4 mb-4">
-                <img src={icon} alt="Icon" className="w-12 h-12 drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]" />
+                <img src={icon} alt="Icon" className="w-auto h-12 drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]" />
             </div>
 
             <div className="z-10 text-center space-y-2 flex-1 flex flex-col justify-center">

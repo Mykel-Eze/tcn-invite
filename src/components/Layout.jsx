@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { LogOut, LayoutDashboard } from 'lucide-react'
-import logo from '../assets/images/tcn_icon_white.png'
+import logo from '../assets/images/tcn_logo_white.png'
 
 export function Layout({ children }) {
     const { user, profile, signOut } = useAuth()
-    const [showMenu, setShowMenu] = useState(false)
+    const [ showMenu, setShowMenu ] = useState(false)
     const navigate = useNavigate()
 
     const handleLogout = async () => {
@@ -18,7 +18,7 @@ export function Layout({ children }) {
         if (!profile?.full_name) return 'U'
         return profile.full_name
             .split(' ')
-            .map(name => name[0])
+            .map(name => name[ 0 ])
             .join('')
             .toUpperCase()
             .substring(0, 2)

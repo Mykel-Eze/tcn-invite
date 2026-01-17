@@ -323,13 +323,13 @@ export default function InvitationFlow() {
                             )}
 
                             <div className="w-full space-y-3">
-                                <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={downloadImage}>
-                                    Download Image
+                                <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold" onClick={downloadImage}>
+                                    ⬇️ Download Image
                                 </Button>
-                                <Button variant="secondary" className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white" onClick={shareOnWhatsApp}>
-                                    📱 Share on WhatsApp
+                                <Button variant="secondary" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold" onClick={shareOnWhatsApp}>
+                                    📤 Share Image
                                 </Button>
-                                <Button variant="ghost" className="w-full" onClick={() => { setStep(1); setGuestData({ name: '', phone: '', email: '', location: '' }); }}>
+                                <Button variant="ghost" className="w-full border border-white/20" onClick={() => { setStep(1); setGuestData({ name: '', phone: '', email: '', location: '' }); }}>
                                     Create Another
                                 </Button>
                             </div>

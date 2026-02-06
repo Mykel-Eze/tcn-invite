@@ -10,14 +10,16 @@ import { FlyerGolden } from '../components/flyers/FlyerGolden'
 import { FlyerMinimal } from '../components/flyers/FlyerMinimal'
 import { FlyerGradient } from '../components/flyers/FlyerGradient'
 import { FlyerLuxury } from '../components/flyers/FlyerLuxury'
+import { FlyerBAFF1 } from '../components/flyers/FlyerBAFF1'
+import { FlyerBAFF2 } from '../components/flyers/FlyerBAFF2'
 
 export default function Dashboard() {
     const { profile, user } = useAuth()
     const isAdmin = profile?.role === 'admin' || profile?.role === 'pcu_host'
-    const [recentInvites, setRecentInvites] = useState([])
-    const [loadingInvites, setLoadingInvites] = useState(true)
-    const [statusFilter, setStatusFilter] = useState('all') // all, sent, attended
-    const [selectedInvite, setSelectedInvite] = useState(null) // For modal
+    const [ recentInvites, setRecentInvites ] = useState([])
+    const [ loadingInvites, setLoadingInvites ] = useState(true)
+    const [ statusFilter, setStatusFilter ] = useState('all') // all, sent, attended
+    const [ selectedInvite, setSelectedInvite ] = useState(null) // For modal
 
     // Fetch recent invites from database
     useEffect(() => {
@@ -52,20 +54,20 @@ export default function Dashboard() {
         }
 
         fetchRecentInvites()
-    }, [user])
+    }, [ user ])
 
     // Filter invites based on status
     const filteredInvites = useMemo(() => {
         if (statusFilter === 'all') return recentInvites
         return recentInvites.filter(invite => invite.status === statusFilter)
-    }, [recentInvites, statusFilter])
+    }, [ recentInvites, statusFilter ])
 
     // Get counts for filter tabs
     const inviteCounts = useMemo(() => ({
         all: recentInvites.length,
         sent: recentInvites.filter(inv => inv.status === 'sent').length,
         attended: recentInvites.filter(inv => inv.status === 'attended').length,
-    }), [recentInvites])
+    }), [ recentInvites ])
 
     // Format date helper
     const formatDate = (dateString) => {
@@ -86,7 +88,7 @@ export default function Dashboard() {
         if (!name) return '?'
         return name
             .split(' ')
-            .map(n => n[0])
+            .map(n => n[ 0 ])
             .join('')
             .toUpperCase()
             .substring(0, 2)
@@ -126,6 +128,10 @@ export default function Dashboard() {
                 return <FlyerGradient {...flyerProps} />
             case 'luxury':
                 return <FlyerLuxury {...flyerProps} />
+            case 'baff1':
+                return <FlyerBAFF1 {...flyerProps} />
+            case 'baff2':
+                return <FlyerBAFF2 {...flyerProps} />
             default:
                 return <FlyerModern {...flyerProps} />
         }
@@ -138,9 +144,11 @@ export default function Dashboard() {
             golden: 'Elegant Gold',
             minimal: 'Clean Minimal',
             gradient: 'Royal Gradient',
-            luxury: 'Black & Gold'
+            luxury: 'Black & Gold',
+            baff1: 'BAFF Special',
+            baff2: 'BAFF Dark'
         }
-        return designs[designId] || 'Modern'
+        return designs[ designId ] || 'Modern'
     }
 
     return (
@@ -149,7 +157,7 @@ export default function Dashboard() {
                 {/* Hero Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Welcome Back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}</h1>
+                        <h1 className="text-2xl font-bold">Welcome Back{profile?.full_name ? `, ${profile.full_name.split(' ')[ 0 ]}` : ''}</h1>
                         <p className="text-gray-400 text-sm">
                             {isAdmin ? 'Admin Dashboard' : 'Member Dashboard'}
                         </p>
@@ -194,32 +202,29 @@ export default function Dashboard() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setStatusFilter('all')}
-                            className={`cursor-pointer px-4 py-2 text-xs font-medium rounded-full transition-all ${
-                                statusFilter === 'all'
-                                    ? 'bg-(--color-accent) text-white shadow-lg'
-                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                            }`}
+                            className={`cursor-pointer px-4 py-2 text-xs font-medium rounded-full transition-all ${statusFilter === 'all'
+                                ? 'bg-(--color-accent) text-white shadow-lg'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                }`}
                         >
                             All ({inviteCounts.all})
                         </button>
                         <button
                             onClick={() => setStatusFilter('sent')}
-                            className={`cursor-pointer px-4 py-2 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${
-                                statusFilter === 'sent'
-                                    ? 'bg-yellow-500 text-black shadow-lg'
-                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                            }`}
+                            className={`cursor-pointer px-4 py-2 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${statusFilter === 'sent'
+                                ? 'bg-yellow-500 text-black shadow-lg'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                }`}
                         >
                             <Clock size={12} />
                             Invited ({inviteCounts.sent})
                         </button>
                         <button
                             onClick={() => setStatusFilter('attended')}
-                            className={`cursor-pointer px-4 py-2 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${
-                                statusFilter === 'attended'
-                                    ? 'bg-green-500 text-black shadow-lg'
-                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                            }`}
+                            className={`cursor-pointer px-4 py-2 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${statusFilter === 'attended'
+                                ? 'bg-green-500 text-black shadow-lg'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                }`}
                         >
                             <CheckCircle size={12} />
                             Attended ({inviteCounts.attended})
@@ -247,20 +252,18 @@ export default function Dashboard() {
                             {filteredInvites.map((invite) => (
                                 <Card
                                     key={invite.id}
-                                    className={`p-4 transition-all hover:scale-[1.01] cursor-pointer ${
-                                        invite.status === 'attended'
-                                            ? 'border-green-500/30 bg-green-500/5'
-                                            : 'hover:bg-white/5'
-                                    }`}
+                                    className={`p-4 transition-all hover:scale-[1.01] cursor-pointer ${invite.status === 'attended'
+                                        ? 'border-green-500/30 bg-green-500/5'
+                                        : 'hover:bg-white/5'
+                                        }`}
                                     onClick={() => setSelectedInvite(invite)}
                                 >
                                     <div className="flex items-start gap-3">
                                         {/* Avatar */}
-                                        <div className={`h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
-                                            invite.status === 'attended'
-                                                ? 'bg-linear-to-br from-green-400 to-emerald-600 text-white'
-                                                : 'bg-linear-to-br from-yellow-300 to-amber-500 text-black'
-                                        }`}>
+                                        <div className={`h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${invite.status === 'attended'
+                                            ? 'bg-linear-to-br from-green-400 to-emerald-600 text-white'
+                                            : 'bg-linear-to-br from-yellow-300 to-amber-500 text-black'
+                                            }`}>
                                             {getGuestInitials(invite.guest_name)}
                                         </div>
 
@@ -317,11 +320,10 @@ export default function Dashboard() {
                         {/* Modal Header */}
                         <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-3">
-                                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                                    selectedInvite.status === 'attended'
-                                        ? 'bg-linear-to-br from-green-400 to-emerald-600 text-white'
-                                        : 'bg-linear-to-br from-yellow-300 to-amber-500 text-black'
-                                }`}>
+                                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${selectedInvite.status === 'attended'
+                                    ? 'bg-linear-to-br from-green-400 to-emerald-600 text-white'
+                                    : 'bg-linear-to-br from-yellow-300 to-amber-500 text-black'
+                                    }`}>
                                     {getGuestInitials(selectedInvite.guest_name)}
                                 </div>
                                 <div>

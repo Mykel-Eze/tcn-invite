@@ -11,6 +11,8 @@ import { FlyerGolden } from '../components/flyers/FlyerGolden'
 import { FlyerMinimal } from '../components/flyers/FlyerMinimal'
 import { FlyerGradient } from '../components/flyers/FlyerGradient'
 import { FlyerLuxury } from '../components/flyers/FlyerLuxury'
+import { FlyerBAFF1 } from '../components/flyers/FlyerBAFF1'
+import { FlyerBAFF2 } from '../components/flyers/FlyerBAFF2'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -264,11 +266,13 @@ export default function InvitationFlow() {
                             <div className="w-full overflow-y-auto max-h-[60vh] pb-[60px] px-4">
                                 <div className="space-y-8">
                                     {[
-                                        { id: 'modern', name: 'Bold Modern', Component: FlyerModern },
-                                        { id: 'golden', name: 'Elegant Gold', Component: FlyerGolden },
-                                        { id: 'minimal', name: 'Clean Minimal', Component: FlyerMinimal },
-                                        { id: 'gradient', name: 'Royal Gradient', Component: FlyerGradient },
-                                        { id: 'luxury', name: 'Black & Gold', Component: FlyerLuxury },
+                                        // { id: 'modern', name: 'Bold Modern', Component: FlyerModern },
+                                        // { id: 'golden', name: 'Elegant Gold', Component: FlyerGolden },
+                                        // { id: 'minimal', name: 'Clean Minimal', Component: FlyerMinimal },
+                                        // { id: 'gradient', name: 'Royal Gradient', Component: FlyerGradient },
+                                        // { id: 'luxury', name: 'Black & Gold', Component: FlyerLuxury },
+                                        { id: 'baff1', name: 'BAFF Special', Component: FlyerBAFF1 },
+                                        { id: 'baff2', name: 'BAFF Dark', Component: FlyerBAFF2 },
                                     ].map(({ id, name, Component }) => (
                                         <div
                                             key={id}
@@ -302,6 +306,8 @@ export default function InvitationFlow() {
                                 {selectedFlyer === 'minimal' && <FlyerMinimal ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
                                 {selectedFlyer === 'gradient' && <FlyerGradient ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
                                 {selectedFlyer === 'luxury' && <FlyerLuxury ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
+                                {selectedFlyer === 'baff1' && <FlyerBAFF1 ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
+                                {selectedFlyer === 'baff2' && <FlyerBAFF2 ref={flyerRef} guestName={guestData.name} campus={selectedCampus} time={selectedTime} qrCodeValue={qrCodeValue} />}
                             </div>
                         </motion.div>
                     )}

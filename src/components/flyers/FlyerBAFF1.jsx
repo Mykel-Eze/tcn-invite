@@ -19,9 +19,13 @@ const FlyerBAFF1 = React.forwardRef(({ guestName, campus, time, qrCodeValue }, r
             <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay" />
 
             {/* --- TOP SECTION: BRANDING --- */}
-            <div className="pt-6 px-6 pb-2 z-10 flex flex-col items-center">
+            <div className="pt-4 px-6 pb-2 z-10 flex flex-col items-center">
                 {/* Church Logo - LARGER as requested */}
                 <img src={churchLogo} alt="The Covenant Nation" className="w-[120px] h-auto object-contain mb-4 drop-shadow-md opacity-95" />
+
+                <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#fff] mt-3 mb-1 text-center">
+                    You are specially invited to
+                </p>
 
                 {/* Event Title */}
                 <div className="w-full flex justify-center relative my-[-10px]">
@@ -29,9 +33,9 @@ const FlyerBAFF1 = React.forwardRef(({ guestName, campus, time, qrCodeValue }, r
                     <img src={eventTitleImage} alt="KindRED Connect" className="w-[160px] h-auto object-contain relative z-10 drop-shadow-lg" />
                 </div>
 
-                <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D9644A] my-3 text-center">
+                {/* <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D9644A] my-3 text-center">
                     Connect &middot; Engage &middot; Grow
-                </p>
+                </p> */}
             </div>
 
             {/* --- MIDDLE: PASTOR --- */}
@@ -42,7 +46,7 @@ const FlyerBAFF1 = React.forwardRef(({ guestName, campus, time, qrCodeValue }, r
                     </div>
                     <div className="absolute -bottom-2 inset-x-0 flex justify-center">
                         <span className="bg-[#1a0510] text-[#D9644A] text-[7px] font-bold uppercase py-0.5 px-2 rounded-full border border-[#D9644A]/30">
-                            Host: Pst. Poju
+                            Pst. Poju Oyemade
                         </span>
                     </div>
                 </div>
@@ -64,12 +68,12 @@ const FlyerBAFF1 = React.forwardRef(({ guestName, campus, time, qrCodeValue }, r
                                     <div className="w-1 h-3 rounded-full bg-[#BF3978]" />
                                     <div>
                                         <p className="text-[9px] font-bold text-white leading-none">{campus?.name || "TCN Campus"}</p>
-                                        <p className="text-[8px] text-white/60 leading-tight truncate max-w-[120px]">{campus?.address}</p>
+                                        <p className="text-[8px] text-white/60 leading-tight max-w-[120px]">{campus?.address}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                     <div className="w-1 h-3 rounded-full bg-[#D9644A]" />
-                                    <p className="text-[9px] font-bold text-white leading-none">{time || "9:00 AM"} <span className="text-white/60 font-medium ml-1">Sunday Service</span></p>
+                                    <p className="text-[9px] font-bold text-white leading-none truncate">{time || "9:00 AM"} <span className="text-white/60 font-medium ml-1">Sunday Service</span></p>
                                 </div>
                             </div>
                         </div>

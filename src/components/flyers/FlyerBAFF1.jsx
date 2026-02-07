@@ -40,11 +40,19 @@ const FlyerBAFF1 = React.forwardRef(({ guestName, campus, time, qrCodeValue }, r
 
             {/* --- MIDDLE: PASTOR --- */}
             <div className="relative z-10 flex justify-center -mt-2">
-                <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-b from-[#D9644A] to-[#A62957] shadow-lg relative">
-                    <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#1a0510]">
+                {/* Pastor Circle */}
+                <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-b from-[#D9644A] to-[#A62957] shadow-lg relative mt-2">
+                    {/* Ministering Badge */}
+                    <div className="absolute -top-3 inset-x-0 flex justify-center z-20">
+                        <span className="bg-[#1a0510] text-white text-[7px] font-bold uppercase py-0.5 px-2 rounded-full border border-[#D9644A]/50 shadow-md tracking-wider">
+                            Ministering
+                        </span>
+                    </div>
+
+                    <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#1a0510] relative z-10">
                         <img src={pastorImage} alt="Pastor Poju" className="w-full h-full object-cover" />
                     </div>
-                    <div className="absolute -bottom-2 inset-x-0 flex justify-center">
+                    <div className="absolute -bottom-2 inset-x-0 flex justify-center z-20">
                         <span className="bg-[#1a0510] text-[#D9644A] text-[7px] font-bold uppercase py-0.5 px-2 rounded-full border border-[#D9644A]/30">
                             Pst.&nbsp;Poju&nbsp;Oyemade
                         </span>

@@ -4,30 +4,31 @@ import { Layout } from '../components/Layout'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { supabase } from '../lib/supabase'
-import { Users, Mail, CheckCircle, TrendingUp, Download, Search, Filter, ArrowUpDown, X, ChevronDown } from 'lucide-react'
+import { Users, Mail, CheckCircle, TrendingUp, Download, Search, Filter, ArrowUpDown, X, ChevronDown, MapPin, MapPinOff } from 'lucide-react'
 
 export default function AdminDashboard() {
-    const [stats, setStats] = useState({
+    const [ stats, setStats ] = useState({
         totalInvitations: 0,
         attendedInvitations: 0,
         totalUsers: 0,
         conversionRate: 0,
     })
-    const [users, setUsers] = useState([])
-    const [invitations, setInvitations] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState('overview') // overview, users, invitations
+    const [ users, setUsers ] = useState([])
+    const [ invitations, setInvitations ] = useState([])
+    const [ campuses, setCampuses ] = useState([])
+    const [ loading, setLoading ] = useState(true)
+    const [ activeTab, setActiveTab ] = useState('overview') // overview, users, invitations
 
     // Search, filter, and sort state
-    const [searchQuery, setSearchQuery] = useState('')
-    const [statusFilter, setStatusFilter] = useState('all') // all, sent, attended
-    const [roleFilter, setRoleFilter] = useState('all') // all, admin, pcu_host, inviter
-    const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' })
-    const [showFilters, setShowFilters] = useState(false)
+    const [ searchQuery, setSearchQuery ] = useState('')
+    const [ statusFilter, setStatusFilter ] = useState('all') // all, sent, attended
+    const [ roleFilter, setRoleFilter ] = useState('all') // all, admin, pcu_host, inviter
+    const [ sortConfig, setSortConfig ] = useState({ key: 'created_at', direction: 'desc' })
+    const [ showFilters, setShowFilters ] = useState(false)
 
     // User details modal state
-    const [selectedUser, setSelectedUser] = useState(null)
-    const [userInvites, setUserInvites] = useState([])
+    const [ selectedUser, setSelectedUser ] = useState(null)
+    const [ userInvites, setUserInvites ] = useState([])
 
     useEffect(() => {
         fetchDashboardData()
@@ -55,6 +56,14 @@ export default function AdminDashboard() {
 
             if (usersError) throw usersError
 
+            // Fetch all campuses
+            const { data: campusesData, error: campusesError } = await supabase
+                .from('campuses')
+                .select('*')
+                .order('name')
+
+            if (campusesError) throw campusesError
+
             // Calculate statistics
             const totalInvitations = invitationsData?.length || 0
             const attendedInvitations = invitationsData?.filter(inv => inv.status === 'attended').length || 0
@@ -71,6 +80,7 @@ export default function AdminDashboard() {
 
             setInvitations(invitationsData || [])
             setUsers(usersData || [])
+            setCampuses(campusesData || [])
         } catch (error) {
             console.error('Error fetching dashboard data:', error)
         } finally {
@@ -93,6 +103,27 @@ export default function AdminDashboard() {
         } catch (error) {
             console.error('Error updating role:', error)
             alert('Failed to update user role: ' + error.message)
+        }
+    }
+
+    // Toggle campus active status
+    const toggleCampusStatus = async (campusId, currentStatus) => {
+        try {
+            const { error } = await supabase
+                .from('campuses')
+                .update({ is_active: !currentStatus })
+                .eq('id', campusId)
+
+            if (error) throw error
+
+            // Update local state
+            setCampuses(campuses.map(c =>
+                c.id === campusId ? { ...c, is_active: !currentStatus } : c
+            ))
+
+        } catch (error) {
+            console.error('Error updating campus status:', error)
+            alert('Failed to update campus status')
         }
     }
 
@@ -120,7 +151,7 @@ export default function AdminDashboard() {
 
     // CSV Export for Invitations
     const exportInvitationsCSV = () => {
-        const headers = ['Guest Name', 'Guest Phone', 'Guest Email', 'Campus', 'Status', 'Invited By', 'Created Date', 'Attended Date']
+        const headers = [ 'Guest Name', 'Guest Phone', 'Guest Email', 'Campus', 'Status', 'Invited By', 'Created Date', 'Attended Date' ]
         const csvData = filteredInvitations.map(inv => [
             inv.guest_name || '',
             inv.guest_phone || '',
@@ -132,7 +163,7 @@ export default function AdminDashboard() {
             inv.attended_at ? new Date(inv.attended_at).toLocaleDateString() : ''
         ])
 
-        const csvContent = [headers, ...csvData]
+        const csvContent = [ headers, ...csvData ]
             .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
             .join('\n')
 
@@ -141,7 +172,7 @@ export default function AdminDashboard() {
 
     // CSV Export for Users
     const exportUsersCSV = () => {
-        const headers = ['Full Name', 'Email', 'Role', 'Invite Count', 'Created Date']
+        const headers = [ 'Full Name', 'Email', 'Role', 'Invite Count', 'Created Date' ]
         const csvData = filteredUsers.map(user => [
             user.full_name || '',
             user.email || '',
@@ -150,7 +181,7 @@ export default function AdminDashboard() {
             user.created_at ? new Date(user.created_at).toLocaleDateString() : ''
         ])
 
-        const csvContent = [headers, ...csvData]
+        const csvContent = [ headers, ...csvData ]
             .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
             .join('\n')
 
@@ -159,7 +190,7 @@ export default function AdminDashboard() {
 
     // Download CSV helper
     const downloadCSV = (content, filename) => {
-        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
+        const blob = new Blob([ content ], { type: 'text/csv;charset=utf-8;' })
         const link = document.createElement('a')
         link.href = URL.createObjectURL(blob)
         link.download = filename
@@ -185,7 +216,7 @@ export default function AdminDashboard() {
 
     // Filter and sort invitations
     const filteredInvitations = useMemo(() => {
-        let result = [...invitations]
+        let result = [ ...invitations ]
 
         // Search filter
         if (searchQuery) {
@@ -206,8 +237,8 @@ export default function AdminDashboard() {
 
         // Sort
         result.sort((a, b) => {
-            let aVal = a[sortConfig.key]
-            let bVal = b[sortConfig.key]
+            let aVal = a[ sortConfig.key ]
+            let bVal = b[ sortConfig.key ]
 
             if (sortConfig.key === 'guest_name') {
                 aVal = a.guest_name || ''
@@ -220,11 +251,11 @@ export default function AdminDashboard() {
         })
 
         return result
-    }, [invitations, searchQuery, statusFilter, sortConfig])
+    }, [ invitations, searchQuery, statusFilter, sortConfig ])
 
     // Filter and sort users
     const filteredUsers = useMemo(() => {
-        let result = [...users]
+        let result = [ ...users ]
 
         // Search filter
         if (searchQuery) {
@@ -248,8 +279,8 @@ export default function AdminDashboard() {
                 aVal = getInviteCount(a.id)
                 bVal = getInviteCount(b.id)
             } else {
-                aVal = a[sortConfig.key] || ''
-                bVal = b[sortConfig.key] || ''
+                aVal = a[ sortConfig.key ] || ''
+                bVal = b[ sortConfig.key ] || ''
             }
 
             if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
@@ -258,7 +289,7 @@ export default function AdminDashboard() {
         })
 
         return result
-    }, [users, searchQuery, roleFilter, sortConfig, invitations])
+    }, [ users, searchQuery, roleFilter, sortConfig, invitations ])
 
     const getRoleBadgeColor = (role) => {
         switch (role) {
@@ -359,33 +390,39 @@ export default function AdminDashboard() {
                 <div className="flex gap-2 border-b border-white/10">
                     <button
                         onClick={() => setActiveTab('overview')}
-                        className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${
-                            activeTab === 'overview'
-                                ? 'text-white border-b-2 border-(--color-accent)'
-                                : 'text-gray-400 hover:text-white'
-                        }`}
+                        className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'overview'
+                            ? 'text-white border-b-2 border-(--color-accent)'
+                            : 'text-gray-400 hover:text-white'
+                            }`}
                     >
                         Overview
                     </button>
                     <button
                         onClick={() => setActiveTab('users')}
-                        className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${
-                            activeTab === 'users'
-                                ? 'text-white border-b-2 border-(--color-accent)'
-                                : 'text-gray-400 hover:text-white'
-                        }`}
+                        className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'users'
+                            ? 'text-white border-b-2 border-(--color-accent)'
+                            : 'text-gray-400 hover:text-white'
+                            }`}
                     >
                         Users ({stats.totalUsers})
                     </button>
                     <button
                         onClick={() => setActiveTab('invitations')}
-                        className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${
-                            activeTab === 'invitations'
-                                ? 'text-white border-b-2 border-(--color-accent)'
-                                : 'text-gray-400 hover:text-white'
-                        }`}
+                        className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'invitations'
+                            ? 'text-white border-b-2 border-(--color-accent)'
+                            : 'text-gray-400 hover:text-white'
+                            }`}
                     >
                         Invitations ({stats.totalInvitations})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('campuses')}
+                        className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'campuses'
+                            ? 'text-white border-b-2 border-(--color-accent)'
+                            : 'text-gray-400 hover:text-white'
+                            }`}
+                    >
+                        Campuses
                     </button>
                 </div>
 
@@ -417,9 +454,8 @@ export default function AdminDashboard() {
                             {/* Filter Toggle */}
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`cursor-pointer flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border transition-colors ${
-                                    showFilters ? 'bg-(--color-accent)/20 border-(--color-accent) text-(--color-accent)' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
-                                }`}
+                                className={`cursor-pointer flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border transition-colors ${showFilters ? 'bg-(--color-accent)/20 border-(--color-accent) text-(--color-accent)' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
+                                    }`}
                             >
                                 <Filter size={14} />
                                 Filters
@@ -553,7 +589,7 @@ export default function AdminDashboard() {
                                         {/* Left side - Avatar, Name, Email, Role */}
                                         <div className="flex gap-3">
                                             <div className="h-12 w-12 rounded-full bg-linear-to-br from-purple-600 to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-lg">
-                                                {user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'U'}
+                                                {user.full_name?.split(' ').map(n => n[ 0 ]).join('').toUpperCase().substring(0, 2) || 'U'}
                                             </div>
                                             <div className="space-y-1">
                                                 <p className="font-semibold text-white">{user.full_name}</p>
@@ -588,21 +624,19 @@ export default function AdminDashboard() {
                                         <div className="flex gap-2 pt-3 border-t border-white/10">
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleRoleChange(user.id, 'inviter'); }}
-                                                className={`cursor-pointer flex-1 px-3 py-2 text-xs rounded-lg transition-all ${
-                                                    user.role === 'inviter'
-                                                        ? 'bg-(--color-accent)/20 text-(--color-accent) border border-(--color-accent)/30 shadow-sm'
-                                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-transparent'
-                                                }`}
+                                                className={`cursor-pointer flex-1 px-3 py-2 text-xs rounded-lg transition-all ${user.role === 'inviter'
+                                                    ? 'bg-(--color-accent)/20 text-(--color-accent) border border-(--color-accent)/30 shadow-sm'
+                                                    : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-transparent'
+                                                    }`}
                                             >
                                                 Member
                                             </button>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleRoleChange(user.id, 'pcu_host'); }}
-                                                className={`cursor-pointer flex-1 px-3 py-2 text-xs rounded-lg transition-all ${
-                                                    user.role === 'pcu_host'
-                                                        ? 'bg-blue-500/20 text-blue-500 border border-blue-500/30 shadow-sm'
-                                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-transparent'
-                                                }`}
+                                                className={`cursor-pointer flex-1 px-3 py-2 text-xs rounded-lg transition-all ${user.role === 'pcu_host'
+                                                    ? 'bg-blue-500/20 text-blue-500 border border-blue-500/30 shadow-sm'
+                                                    : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-transparent'
+                                                    }`}
                                             >
                                                 PCU Host
                                             </button>
@@ -652,6 +686,52 @@ export default function AdminDashboard() {
                     </div>
                 )}
 
+                {activeTab === 'campuses' && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-lg font-bold">Manage Campuses</h2>
+                            <span className="text-xs text-gray-400">{campuses.length} total</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {campuses.map((campus) => (
+                                <Card key={campus.id} className={`p-4 transition-all ${!campus.is_active ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h3 className="font-bold text-white">{campus.name}</h3>
+                                                {!campus.is_active && (
+                                                    <span className="text-[10px] font-bold uppercase bg-red-500/20 text-red-500 px-2 py-0.5 rounded-full">Inactive</span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-400 mb-2">{campus.address}</p>
+
+                                            <div className="flex gap-2 flex-wrap">
+                                                {campus.service_times?.map((time, idx) => (
+                                                    <span key={idx} className="text-[10px] bg-white/10 text-white/70 px-2 py-0.5 rounded">
+                                                        {time}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => toggleCampusStatus(campus.id, campus.is_active)}
+                                            className={`cursor-pointer p-2 rounded-lg transition-colors ${campus.is_active
+                                                ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
+                                                : 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
+                                                }`}
+                                            title={campus.is_active ? "Deactivate Campus" : "Activate Campus"}
+                                        >
+                                            {campus.is_active ? <MapPinOff size={18} /> : <MapPin size={18} />}
+                                        </button>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* User Invites Modal */}
                 {selectedUser && (
                     <>
@@ -667,7 +747,7 @@ export default function AdminDashboard() {
                             <div className="p-4 border-b border-white/10 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="h-10 w-10 rounded-full bg-linear-to-br from-gray-800 to-black flex items-center justify-center text-xs font-bold">
-                                        {selectedUser.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'U'}
+                                        {selectedUser.full_name?.split(' ').map(n => n[ 0 ]).join('').toUpperCase().substring(0, 2) || 'U'}
                                     </div>
                                     <div>
                                         <p className="font-medium text-white">{selectedUser.full_name}</p>

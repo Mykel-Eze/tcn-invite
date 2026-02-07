@@ -37,7 +37,9 @@ export default function InvitationFlow() {
                 const { data, error } = await supabase
                     .from('campuses')
                     .select('*')
+                    .eq('is_active', true) // Only show active campuses
                     .order('name')
+
 
                 if (error) {
                     console.error('❌ Error fetching campuses:', error)

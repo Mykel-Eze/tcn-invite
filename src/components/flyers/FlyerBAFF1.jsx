@@ -46,7 +46,7 @@ const FlyerBAFF1 = React.forwardRef(({ guestName, campus, time, qrCodeValue }, r
                     </div>
                     <div className="absolute -bottom-2 inset-x-0 flex justify-center">
                         <span className="bg-[#1a0510] text-[#D9644A] text-[7px] font-bold uppercase py-0.5 px-2 rounded-full border border-[#D9644A]/30">
-                            Pst. Poju Oyemade
+                            Pst.&nbsp;Poju&nbsp;Oyemade
                         </span>
                     </div>
                 </div>
@@ -60,7 +60,7 @@ const FlyerBAFF1 = React.forwardRef(({ guestName, campus, time, qrCodeValue }, r
 
                     <div className="flex gap-3 items-end">
                         <div className="flex-1 min-w-0">
-                            <p className="text-[8px] text-[#D9644A] font-bold uppercase mb-0.5 tracking-wider">Reserved For</p>
+                            <p className="text-[8px] text-[#D9644A] font-bold uppercase mb-0.5 tracking-wider">Join us this Sunday, Feb 15</p>
                             <h2 className="text-lg font-black leading-none truncate text-white mb-2">{guestName || "Special Guest"}</h2>
 
                             <div className="space-y-1">
@@ -73,7 +73,7 @@ const FlyerBAFF1 = React.forwardRef(({ guestName, campus, time, qrCodeValue }, r
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                     <div className="w-1 h-3 rounded-full bg-[#D9644A]" />
-                                    <p className="text-[9px] font-bold text-white leading-none truncate">{time || "9:00 AM"} <span className="text-white/60 font-medium ml-1">Sunday Service</span></p>
+                                    <p className="text-[9px] font-bold text-white leading-none">{time || "9:00 AM"} <span className="text-white/60 font-medium ml-1">Sunday Service</span></p>
                                 </div>
                             </div>
                         </div>

@@ -4,8 +4,8 @@ import { supabase } from '../lib/supabase'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 
 export default function AuthCallback() {
-    const [status, setStatus] = useState('loading') // loading, success, error
-    const [message, setMessage] = useState('Verifying your email...')
+    const [ status, setStatus ] = useState('loading') // loading, success, error
+    const [ message, setMessage ] = useState('Verifying your email...')
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -85,7 +85,7 @@ export default function AuthCallback() {
         }
 
         handleEmailVerification()
-    }, [navigate])
+    }, [ navigate ])
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-[#121212] relative overflow-hidden">
@@ -99,7 +99,7 @@ export default function AuthCallback() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <img
-                        src="/tcn_logo.png"
+                        src="/tcn_logo_white.png"
                         alt="TCN Logo"
                         className="h-16 mx-auto mb-4"
                     />
@@ -121,11 +121,10 @@ export default function AuthCallback() {
                         )}
 
                         {/* Message */}
-                        <p className={`text-lg ${
-                            status === 'loading' ? 'text-gray-300' :
-                            status === 'success' ? 'text-green-400' :
-                            'text-red-400'
-                        }`}>
+                        <p className={`text-lg ${status === 'loading' ? 'text-gray-300' :
+                                status === 'success' ? 'text-green-400' :
+                                    'text-red-400'
+                            }`}>
                             {message}
                         </p>
 

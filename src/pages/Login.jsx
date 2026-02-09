@@ -7,10 +7,10 @@ import { Card } from '../components/ui/Card'
 import logo from '../assets/images/tcn_icon_white.png'
 
 export default function Login() {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [ email, setEmail ] = useState('')
+    const [ password, setPassword ] = useState('')
+    const [ error, setError ] = useState('')
+    const [ loading, setLoading ] = useState(false)
     const { signIn } = useAuth()
     const navigate = useNavigate()
 
@@ -112,6 +112,12 @@ export default function Login() {
                             placeholder="Enter your password"
                             required
                         />
+
+                        <div className="flex justify-end">
+                            <Link to="/forgot-password" className="text-sm text-[var(--color-accent)] hover:underline">
+                                Forgot Password?
+                            </Link>
+                        </div>
 
                         <Button
                             type="submit"

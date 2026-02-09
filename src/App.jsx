@@ -10,6 +10,8 @@ import InvitationFlow from './pages/InvitationFlow'
 import PCUCheckIn from './pages/PCUCheckIn'
 import InviteDetails from './pages/InviteDetails'
 import AdminDashboard from './pages/AdminDashboard'
+import ForgotPassword from './pages/ForgotPassword'
+import UpdatePassword from './pages/UpdatePassword'
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
 
           {/* Auth callback routes (for email verification) */}
           <Route path="/auth/callback" element={<AuthCallback />} />

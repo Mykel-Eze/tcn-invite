@@ -3,9 +3,9 @@ import { supabase } from '../lib/supabase'
 import AuthContext from './AuthContext'
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null)
-    const [profile, setProfile] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const [ user, setUser ] = useState(null)
+    const [ profile, setProfile ] = useState(null)
+    const [ loading, setLoading ] = useState(true)
 
     useEffect(() => {
         console.log('🚀 AuthProvider mounted, setting up auth listener')
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
                 .eq('id', userId)
                 .single()
 
-            const { data, error } = await Promise.race([fetchPromise, timeoutPromise])
+            const { data, error } = await Promise.race([ fetchPromise, timeoutPromise ])
 
             if (error) {
                 console.error('❌ Error fetching profile:', error)
@@ -280,6 +280,36 @@ export const AuthProvider = ({ children }) => {
         return profile?.role === 'admin' || profile?.role === 'pcu_host'
     }
 
+    const resetPasswordForEmail = async (email) => {
+        try {
+            console.log('📧 Sending password reset email to:', email)
+            const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/update-password`,
+            })
+            if (error) throw error
+            console.log('✓ Password reset email sent')
+            return { data, error: null }
+        } catch (error) {
+            console.error('❌ Error sending reset email:', error)
+            return { data: null, error }
+        }
+    }
+
+    const updatePassword = async (newPassword) => {
+        try {
+            console.log('🔑 Updating password...')
+            const { data, error } = await supabase.auth.updateUser({
+                password: newPassword
+            })
+            if (error) throw error
+            console.log('✓ Password updated successfully')
+            return { data, error: null }
+        } catch (error) {
+            console.error('❌ Error updating password:', error)
+            return { data: null, error }
+        }
+    }
+
     const value = {
         user,
         profile,
@@ -287,7 +317,10 @@ export const AuthProvider = ({ children }) => {
         signUp,
         signIn,
         signOut,
+        signOut,
         isAdmin,
+        resetPasswordForEmail,
+        updatePassword,
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

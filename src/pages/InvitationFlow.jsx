@@ -268,13 +268,13 @@ export default function InvitationFlow() {
                             <div className="w-full overflow-y-auto max-h-[60vh] pb-[60px] px-4">
                                 <div className="space-y-8">
                                     {[
-                                        // { id: 'modern', name: 'Bold Modern', Component: FlyerModern },
-                                        // { id: 'golden', name: 'Elegant Gold', Component: FlyerGolden },
-                                        // { id: 'minimal', name: 'Clean Minimal', Component: FlyerMinimal },
-                                        // { id: 'gradient', name: 'Royal Gradient', Component: FlyerGradient },
-                                        // { id: 'luxury', name: 'Black & Gold', Component: FlyerLuxury },
-                                        { id: 'baff1', name: 'BAFF Special', Component: FlyerBAFF1 },
-                                        { id: 'baff2', name: 'BAFF Dark', Component: FlyerBAFF2 },
+                                        { id: 'modern', name: 'Bold Modern', Component: FlyerModern },
+                                        { id: 'golden', name: 'Elegant Gold', Component: FlyerGolden },
+                                        { id: 'minimal', name: 'Clean Minimal', Component: FlyerMinimal },
+                                        { id: 'gradient', name: 'Royal Gradient', Component: FlyerGradient },
+                                        { id: 'luxury', name: 'Black & Gold', Component: FlyerLuxury },
+                                        // { id: 'baff1', name: 'BAFF Special', Component: FlyerBAFF1 },
+                                        // { id: 'baff2', name: 'BAFF Dark', Component: FlyerBAFF2 },
                                     ].map(({ id, name, Component }) => (
                                         <div
                                             key={id}

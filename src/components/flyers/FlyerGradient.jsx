@@ -54,7 +54,7 @@ const FlyerGradient = React.forwardRef(({ guestName, campus, time, qrCodeValue }
                 </div>
                 <div className="flex justify-between items-center">
                     <span className="text-[10px] text-gray-300 uppercase tracking-wide">When</span>
-                    <span className="font-semibold text-xs">{time || "9:00 AM"}</span>
+                    <span className="font-semibold text-xs truncate min-w-[50px]">{time || "9:00 AM"}</span>
                 </div>
             </div>
 

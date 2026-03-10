@@ -317,7 +317,6 @@ export const AuthProvider = ({ children }) => {
         signUp,
         signIn,
         signOut,
-        signOut,
         isAdmin,
         resetPasswordForEmail,
         updatePassword,

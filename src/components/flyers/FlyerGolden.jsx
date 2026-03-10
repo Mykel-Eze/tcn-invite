@@ -54,7 +54,7 @@ const FlyerGolden = React.forwardRef(({ guestName, campus, time, qrCodeValue }, 
                 </div>
 
                 <div className="inline-block px-3 py-1 border border-[var(--color-highlight)] rounded-full">
-                    <p className="text-[var(--color-highlight)] text-[10px] font-semibold">{time || "9:00 AM"}</p>
+                    <p className="text-[var(--color-highlight)] text-[10px] font-semibold truncate min-w-[50px]">{time || "9:00 AM"}</p>
                 </div>
             </div>
 

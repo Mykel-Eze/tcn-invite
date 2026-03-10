@@ -50,7 +50,7 @@ const FlyerMinimal = React.forwardRef(({ guestName, campus, time, qrCodeValue },
 
                 <div>
                     <p className="text-[10px] font-bold uppercase text-gray-500">When</p>
-                    <p className="font-bold text-xs mt-0.5">{time || "9:00 AM"}</p>
+                    <p className="font-bold text-xs mt-0.5 truncate min-w-[50px]">{time || "9:00 AM"}</p>
                 </div>
             </div>
 

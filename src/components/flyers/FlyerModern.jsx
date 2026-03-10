@@ -49,8 +49,8 @@ const FlyerModern = React.forwardRef(({ guestName, campus, time, qrCodeValue }, 
 
                 <div className="flex justify-center">
                     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-1.5 px-3">
-                        <p className="text-[var(--color-accent)] font-bold text-[9px] uppercase tracking-wider">Time</p>
-                        <p className="text-[11px] font-semibold mt-0.5">{time || "9:00 AM"}</p>
+                        <p className="text-[var(--color-accent)] font-bold text-[9px] uppercase tracking-wider text-center">Time</p>
+                        <p className="text-[11px] font-semibold mt-0.5 truncate min-w-[50px]">{time || "9:00 AM"}</p>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@ const FlyerModern = React.forwardRef(({ guestName, campus, time, qrCodeValue }, 
             </div>
 
             {/* Scan Text */}
-            <div className="text-[8px] text-gray-600 z-10 mt-1 shrink-0">Scan at PCU desk</div>
+            <div className="text-[8px] text-gray-600 z-10 mt-1 shrink-0">Scan&nbsp;at&nbsp;PCU&nbsp;desk</div>
         </div>
     )
 })

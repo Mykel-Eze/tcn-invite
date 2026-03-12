@@ -28,7 +28,7 @@ const FlyerLuxury = React.forwardRef(({ guestName, campus, time, qrCodeValue }, 
 
             {/* Title */}
             <div className="z-10 text-center mt-3 border-b border-[#FFD700]/30 pb-2 w-full shrink-0">
-                <p className="text-[9px] uppercase tracking-[0.4em] text-white/60 mb-0.5">The City Needs You</p>
+                {/* <p className="text-[9px] uppercase tracking-[0.4em] text-white/60 mb-0.5">The City Needs You</p> */}
                 <h1 className="text-xl font-serif text-white tracking-wide">INVITATION</h1>
             </div>
 

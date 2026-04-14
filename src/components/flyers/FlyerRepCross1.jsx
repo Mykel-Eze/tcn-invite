@@ -10,12 +10,18 @@ const FlyerRepCross1 = React.forwardRef(({ guestName, campus, time, qrCodeValue 
             <div className="absolute inset-0">
                 <img src={backgroundImage} alt="Rep the Cross Background" className="w-full h-full object-cover opacity-100 mix-blend-screen" />
                 {/* Dark gradients to ensure text readability */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-black/80" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/80" />
             </div>
 
             {/* --- TOP SECTION: BRANDING --- */}
             <div className="pt-6 px-6 z-10 flex flex-col items-center">
                 <img src={churchLogo} alt="The Covenant Nation" className="w-[110px] h-auto object-contain drop-shadow-md opacity-95" />
+            </div>
+
+            <div>
+                <p className="pt-5 text-[9px] uppercase tracking-[0.2em] font-bold text-[#D9644A] mb-1 text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    You are specially invited to
+                </p>
             </div>
 
             {/* --- MIDDLE: SPACING FOR BACKGROUND --- */}
@@ -27,9 +33,6 @@ const FlyerRepCross1 = React.forwardRef(({ guestName, campus, time, qrCodeValue 
             <div className="px-3 pb-3 flex flex-col justify-end z-10">
                 {/* Event Title Typography */}
                 <div className="w-full flex flex-col items-center justify-center relative mb-3">
-                    <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D9644A] mb-1 text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                        You are specially invited to
-                    </p>
                     <h1 className="text-4xl font-black italic tracking-tighter text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-none text-center">
                         REP THE
                     </h1>

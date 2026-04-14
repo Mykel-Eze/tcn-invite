@@ -8,21 +8,28 @@ const FlyerRepCross1 = React.forwardRef(({ guestName, campus, time, qrCodeValue 
         <div ref={ref} className="w-[300px] h-[500px] relative flex flex-col shadow-2xl overflow-hidden font-sans text-white bg-black">
             {/* --- BACKGROUND IMAGE --- */}
             <div className="absolute inset-0">
-                <img src={backgroundImage} alt="Rep the Cross Background" className="w-full h-full object-cover opacity-80 mix-blend-screen" />
+                <img src={backgroundImage} alt="Rep the Cross Background" className="w-full h-full object-cover opacity-100 mix-blend-screen" />
                 {/* Dark gradients to ensure text readability */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-black/80" />
             </div>
 
             {/* --- TOP SECTION: BRANDING --- */}
-            <div className="pt-4 px-6 pb-2 z-10 flex flex-col items-center">
-                <img src={churchLogo} alt="The Covenant Nation" className="w-[110px] h-auto object-contain mb-2 drop-shadow-md opacity-95" />
+            <div className="pt-6 px-6 z-10 flex flex-col items-center">
+                <img src={churchLogo} alt="The Covenant Nation" className="w-[110px] h-auto object-contain drop-shadow-md opacity-95" />
+            </div>
 
-                <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D9644A] mt-2 mb-1 text-center">
-                    You are specially invited to
-                </p>
+            {/* --- MIDDLE: SPACING FOR BACKGROUND --- */}
+            <div className="relative z-10 flex-1">
+                {/* Empty space allows background to be more prominent */}
+            </div>
 
+            {/* --- BOTTOM: TITLE & GUEST CARD --- */}
+            <div className="px-3 pb-3 flex flex-col justify-end z-10">
                 {/* Event Title Typography */}
-                <div className="w-full flex flex-col items-center justify-center relative my-1">
+                <div className="w-full flex flex-col items-center justify-center relative mb-3">
+                    <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D9644A] mb-1 text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                        You are specially invited to
+                    </p>
                     <h1 className="text-4xl font-black italic tracking-tighter text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-none text-center">
                         REP THE
                     </h1>
@@ -30,16 +37,9 @@ const FlyerRepCross1 = React.forwardRef(({ guestName, campus, time, qrCodeValue 
                         CROSS
                     </h1>
                 </div>
-            </div>
 
-            {/* --- MIDDLE: SPACING FOR BACKGROUND --- */}
-            <div className="relative z-10 flex-1 flex justify-center mt-1">
-                {/* Empty space allows background to be more prominent */}
-            </div>
-
-            {/* --- BOTTOM: GUEST CARD (Glassmorphism) --- */}
-            <div className="flex-1 px-3 pb-3 pt-1 flex flex-col justify-end z-10">
-                <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-2xl relative overflow-hidden group">
+                {/* Guest Card (Glassmorphism) */}
+                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-white/5 to-transparent skew-x-12 opacity-50" />
 
                     <div className="flex gap-3 items-end">

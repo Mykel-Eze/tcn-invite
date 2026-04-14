@@ -9,25 +9,32 @@ const FlyerRepCross2 = React.forwardRef(({ guestName, campus, time, qrCodeValue 
             {/* --- FILTERED BACKGROUND --- */}
             <div className="absolute inset-0">
                 {/* Image converted to grayscale with red blend mode */}
-                <img src={backgroundImage} alt="Rep the Cross Background" className="w-full h-full object-cover grayscale mix-blend-luminosity opacity-40" />
-                <div className="absolute inset-0 bg-[#A62957] mix-blend-color opacity-70" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#12040b] via-[#12040b]/60 to-transparent" />
+                <img src={backgroundImage} alt="Rep the Cross Background" className="w-full h-full object-cover grayscale mix-blend-luminosity opacity-60" />
+                <div className="absolute inset-0 bg-[#A62957] mix-blend-color opacity-50" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#12040b] via-[#12040b]/30 to-transparent" />
             </div>
 
             {/* --- TOP SECTION: BRANDING --- */}
-            <div className="pt-5 px-6 pb-2 z-10 flex flex-col items-center">
-                <img src={churchLogo} alt="The Covenant Nation" className="w-[100px] h-auto object-contain mb-3 drop-shadow-md opacity-90" />
+            <div className="pt-6 px-6 z-10 flex flex-col items-center">
+                <img src={churchLogo} alt="The Covenant Nation" className="w-[100px] h-auto object-contain drop-shadow-md opacity-90" />
+            </div>
 
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="h-[1px] w-8 bg-[#D9644A]" />
-                    <p className="text-[8px] uppercase tracking-[0.3em] font-bold text-[#D9644A] text-center">
-                        Special Service
-                    </p>
-                    <div className="h-[1px] w-8 bg-[#D9644A]" />
-                </div>
+            {/* --- MIDDLE: SPACING FOR BACKGROUND --- */}
+            <div className="relative z-10 flex-1">
+                 {/* Empty space to show off the filtered background */}
+            </div>
 
+            {/* --- BOTTOM: TITLE & GUEST DETAILS --- */}
+            <div className="px-5 pb-5 flex flex-col justify-end z-10">
                 {/* Event Title Typography */}
-                <div className="w-full flex flex-col items-center justify-center relative">
+                <div className="w-full flex flex-col items-center justify-center relative mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="h-[1px] w-8 bg-[#D9644A]" />
+                        <p className="text-[8px] uppercase tracking-[0.3em] font-bold text-[#D9644A] text-center drop-shadow-md">
+                            Special Service
+                        </p>
+                        <div className="h-[1px] w-8 bg-[#D9644A]" />
+                    </div>
                     <h1 className="text-4xl font-black tracking-widest text-[#fff] drop-shadow-[0_4px_10px_rgba(166,41,87,0.8)] leading-none text-center">
                         REP THE
                     </h1>
@@ -35,15 +42,7 @@ const FlyerRepCross2 = React.forwardRef(({ guestName, campus, time, qrCodeValue 
                         CROSS
                     </h1>
                 </div>
-            </div>
 
-            {/* --- MIDDLE: SPACING FOR BACKGROUND --- */}
-            <div className="relative z-10 flex-1 flex justify-center mt-3">
-                 {/* Empty space to show off the filtered background */}
-            </div>
-
-            {/* --- BOTTOM: GUEST DETAILS (Minimal Line Style) --- */}
-            <div className="flex-1 px-5 pb-5 flex flex-col justify-end z-10">
                 <div className="border-t border-white/20 pt-3 flex flex-col gap-2">
                     <div className="text-center mb-1">
                         <p className="text-[8px] text-gray-400 font-medium uppercase tracking-[0.2em]">Prepared For</p>

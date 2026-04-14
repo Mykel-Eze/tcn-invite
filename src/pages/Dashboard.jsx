@@ -12,6 +12,9 @@ import { FlyerGradient } from '../components/flyers/FlyerGradient'
 import { FlyerLuxury } from '../components/flyers/FlyerLuxury'
 import { FlyerBAFF1 } from '../components/flyers/FlyerBAFF1'
 import { FlyerBAFF2 } from '../components/flyers/FlyerBAFF2'
+import { FlyerRepCross1 } from '../components/flyers/FlyerRepCross1'
+import { FlyerRepCross2 } from '../components/flyers/FlyerRepCross2'
+import { FlyerRepCross3 } from '../components/flyers/FlyerRepCross3'
 
 export default function Dashboard() {
     const { profile, user } = useAuth()
@@ -132,6 +135,12 @@ export default function Dashboard() {
                 return <FlyerBAFF1 {...flyerProps} />
             case 'baff2':
                 return <FlyerBAFF2 {...flyerProps} />
+            case 'repcross1':
+                return <FlyerRepCross1 {...flyerProps} />
+            case 'repcross2':
+                return <FlyerRepCross2 {...flyerProps} />
+            case 'repcross3':
+                return <FlyerRepCross3 {...flyerProps} />
             default:
                 return <FlyerModern {...flyerProps} />
         }
@@ -146,7 +155,10 @@ export default function Dashboard() {
             gradient: 'Royal Gradient',
             luxury: 'Black & Gold',
             baff1: 'BAFF Special',
-            baff2: 'BAFF Dark'
+            baff2: 'BAFF Dark',
+            repcross1: 'Rep The Cross 1',
+            repcross2: 'Rep The Cross 2',
+            repcross3: 'Rep The Cross 3'
         }
         return designs[ designId ] || 'Modern'
     }

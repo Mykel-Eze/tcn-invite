@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { PasswordInput } from '../components/ui/PasswordInput'
 import { Card } from '../components/ui/Card'
 import { Notification } from '../components/Notification'
 import logo from '../assets/images/tcn_icon_white.png'
@@ -11,6 +12,7 @@ export default function Signup() {
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
+        phone: '',
         password: '',
         confirmPassword: '',
     })
@@ -31,6 +33,12 @@ export default function Signup() {
         e.preventDefault()
         setError('')
 
+        // Validate phone number (digits, optional +, spaces/dashes; 7-15 digits)
+        if (!/^\+?[\d\s-]{7,17}$/.test(formData.phone.trim()) ) {
+            setError('Please enter a valid phone number (e.g. +2348012345678)')
+            return
+        }
+
         // Validate passwords match
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match')
@@ -38,8 +46,8 @@ export default function Signup() {
         }
 
         // Validate password length
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters')
+        if (formData.password.length < 8) {
+            setError('Password must be at least 8 characters')
             return
         }
 
@@ -54,11 +62,13 @@ export default function Signup() {
 
         try {
             console.log('📝 Submitting signup form...')
+            // Role is never sent from the client — the database assigns
+            // 'inviter' by default and only admins can promote users.
             const result = await signUp({
                 email: formData.email,
                 password: formData.password,
                 fullName: formData.fullName,
-                role: 'inviter', // All signups are members/inviters by default
+                phone: formData.phone.trim(),
             })
 
             clearTimeout(timeoutId) // Clear timeout if signup completes
@@ -160,18 +170,26 @@ export default function Signup() {
                         />
 
                         <Input
-                            label="Password"
-                            type="password"
-                            name="password"
-                            value={formData.password}
+                            label="Phone Number"
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
                             onChange={handleChange}
-                            placeholder="At least 6 characters"
+                            placeholder="+234 801 234 5678"
                             required
                         />
 
-                        <Input
+                        <PasswordInput
+                            label="Password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="At least 8 characters"
+                            required
+                        />
+
+                        <PasswordInput
                             label="Confirm Password"
-                            type="password"
                             name="confirmPassword"
                             value={formData.confirmPassword}
                             onChange={handleChange}

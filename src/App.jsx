@@ -12,6 +12,7 @@ import InviteDetails from './pages/InviteDetails'
 import AdminDashboard from './pages/AdminDashboard'
 import ForgotPassword from './pages/ForgotPassword'
 import UpdatePassword from './pages/UpdatePassword'
+import ProfileSettings from './pages/ProfileSettings'
 
 export default function App() {
   return (
@@ -42,6 +43,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <InvitationFlow />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <ProfileSettings />
               </ProtectedRoute>
             }
           />

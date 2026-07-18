@@ -21,7 +21,7 @@ This is **CRITICAL** - the trigger auto-creates profiles with the correct data.
    - Click "SQL Editor" in left sidebar
    - Click "New Query"
 
-3. **Paste the entire contents of [fix-with-trigger.sql](fix-with-trigger.sql)**
+3. **Paste the entire contents of [004_profile_creation_trigger.sql](../supabase/migrations/004_profile_creation_trigger.sql)**
 
 4. **Click "Run"** (or press Ctrl+Enter)
 
@@ -99,7 +99,7 @@ Should return: `on_auth_user_created`
 -- Check if function exists:
 SELECT proname FROM pg_proc WHERE proname = 'handle_new_user';
 
--- If it doesn't exist, re-run the fix-with-trigger.sql
+-- If it doesn't exist, re-run the 004_profile_creation_trigger.sql
 ```
 
 ### Problem: Signup still stuck in loading
@@ -167,7 +167,7 @@ CREATE POLICY "Users can update own profile."
 - ✅ Better loading state management
 - ✅ Console log on successful signup
 
-### 3. [fix-with-trigger.sql](fix-with-trigger.sql)
+### 3. [004_profile_creation_trigger.sql](../supabase/migrations/004_profile_creation_trigger.sql)
 **Changes:**
 - ✅ Updated to properly extract `full_name` from metadata
 - ✅ Default to 'New User' if full_name is missing

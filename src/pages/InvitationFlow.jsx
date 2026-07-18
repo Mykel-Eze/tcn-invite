@@ -87,21 +87,37 @@ export default function InvitationFlow() {
             setQrCodeValue(verificationUrl)
 
             // 2. Save Invite to Supabase with authenticated user as inviter
-            const { error } = await supabase.from('invitations').insert({
+            const inviteRow = {
                 qr_code_value: uniqueId,
                 guest_name: guestData.name,
                 guest_phone: guestData.phone,
                 guest_email: guestData.email || null,
                 campus_id: selectedCampus.id,
                 flyer_design_id: selectedFlyer,
+                service_time: selectedTime || null,
                 status: 'sent',
                 inviter_id: user?.id, // Use authenticated user's ID
                 delivery_method: 'download', // Default to download, can be updated when WhatsApp is clicked
-            })
+            }
+
+            let { error } = await supabase.from('invitations').insert(inviteRow)
+
+            // If the DB hasn't been migrated with the service_time column yet
+            // (PGRST204 = unknown column), retry without it so invites still save
+            if (error?.code === 'PGRST204') {
+                console.warn('service_time column missing — run the latest migration. Saving without it.')
+                const { service_time, ...legacyRow } = inviteRow
+                void service_time
+                ;({ error } = await supabase.from('invitations').insert(legacyRow))
+            }
 
             if (error) {
+                // If the invite isn't saved, its QR code can never be verified
+                // at check-in — stop and let the user retry instead of handing
+                // out a broken flyer.
                 console.error('Error saving invitation:', error)
-                // Continue anyway - the invitation will still work for the guest
+                alert('Could not save this invitation. Please check your connection and try again.')
+                return
             }
 
             // Wait a tick for React to render the QRCode with the new Value

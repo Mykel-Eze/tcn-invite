@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { LogOut, LayoutDashboard } from 'lucide-react'
+import { LogOut, LayoutDashboard, Settings } from 'lucide-react'
 import logo from '../assets/images/tcn_logo_white.png'
 
 export function Layout({ children }) {
@@ -15,13 +15,17 @@ export function Layout({ children }) {
     }
 
     const getInitials = () => {
-        if (!profile?.full_name) return 'U'
-        return profile.full_name
-            .split(' ')
-            .map(name => name[ 0 ])
-            .join('')
-            .toUpperCase()
-            .substring(0, 2)
+        const name = profile?.full_name || user?.user_metadata?.full_name
+        if (name) {
+            return name
+                .split(' ')
+                .map(n => n[ 0 ])
+                .join('')
+                .toUpperCase()
+                .substring(0, 2)
+        }
+        // Fall back to the account email so the avatar never disappears
+        return (profile?.email || user?.email || 'U').charAt(0).toUpperCase()
     }
 
     return (
@@ -39,11 +43,11 @@ export function Layout({ children }) {
                         <img src={logo} alt="TCN Logo" className="h-16 w-auto object-contain hover:opacity-80 transition-opacity" />
                     </Link>
 
-                    {/* User Menu */}
-                    {user && profile && (
+                    {/* User Menu — render from the session user; profile fills in details */}
+                    {user && (
                         <div className="relative flex items-center gap-2">
                             {/* Dashboard Quick Access for Admin */}
-                            {(profile.role === 'admin' || profile.role === 'pcu_host') && (
+                            {(profile?.role === 'admin' || profile?.role === 'pcu_host') && (
                                 <Link
                                     to="/admin"
                                     className="h-10 w-10 bg-white/10 hover:bg-white/20 cursor-pointer rounded-full flex items-center justify-center text-white transition-colors"
@@ -71,17 +75,17 @@ export function Layout({ children }) {
                                     <div className="absolute right-0 mt-2 w-64 bg-gray-900 border border-white/10 rounded-lg shadow-lg overflow-hidden z-20">
                                         {/* User Info */}
                                         <div className="p-4 border-b border-white/10">
-                                            <p className="font-semibold text-white">{profile.full_name}</p>
-                                            <p className="text-sm text-gray-400">{profile.email}</p>
+                                            <p className="font-semibold text-white">{profile?.full_name || user?.user_metadata?.full_name || 'Member'}</p>
+                                            <p className="text-sm text-gray-400">{profile?.email || user?.email}</p>
                                             <div className="mt-2">
                                                 <span className="text-xs px-2 py-1 rounded bg-(--color-accent)/20 text-(--color-accent) font-medium">
-                                                    {profile.role === 'admin' ? 'Admin' : profile.role === 'pcu_host' ? 'PCU Host' : 'Member'}
+                                                    {profile?.role === 'admin' ? 'Admin' : profile?.role === 'pcu_host' ? 'PCU Host' : 'Member'}
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Menu Items */}
-                                        {profile.role === 'admin' && (
+                                        {profile?.role === 'admin' && (
                                             <Link
                                                 to="/admin"
                                                 onClick={() => setShowMenu(false)}
@@ -91,6 +95,14 @@ export function Layout({ children }) {
                                                 <span>Admin Dashboard</span>
                                             </Link>
                                         )}
+                                        <Link
+                                            to="/settings"
+                                            onClick={() => setShowMenu(false)}
+                                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition-colors text-white"
+                                        >
+                                            <Settings size={18} />
+                                            <span>Profile Settings</span>
+                                        </Link>
                                         <button
                                             onClick={handleLogout}
                                             className="cursor-pointer w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-white/5 transition-colors text-red-400"

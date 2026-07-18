@@ -38,6 +38,10 @@ export default function InviteDetails() {
                 .eq('qr_code_value', id)
                 .single()
 
+            if (fetchError) {
+                console.error('Error fetching invitation:', fetchError.message)
+            }
+
             if (data) {
                 setInvite(data)
 

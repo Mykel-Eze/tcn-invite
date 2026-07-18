@@ -22,7 +22,7 @@ This is the **production-ready** approach that major apps use.
 
 **1. Run this SQL in Supabase SQL Editor:**
 
-Open your Supabase project → SQL Editor → New Query → Paste [fix-with-trigger.sql](fix-with-trigger.sql) → Run
+Open your Supabase project → SQL Editor → New Query → Paste [004_profile_creation_trigger.sql](../supabase/migrations/004_profile_creation_trigger.sql) → Run
 
 **2. That's it!**
 
@@ -43,7 +43,7 @@ If you prefer NOT to use triggers, use this approach:
 
 **1. Run this SQL in Supabase SQL Editor:**
 
-Open your Supabase project → SQL Editor → New Query → Paste [fix-rls-complete.sql](fix-rls-complete.sql) → Run
+Open your Supabase project → SQL Editor → New Query → Paste [003_fix_rls_complete.sql](../supabase/migrations/003_fix_rls_complete.sql) → Run
 
 **2. The code is already updated** in [AuthContext.jsx](src/contexts/AuthContext.jsx) with:
 - Better error handling
@@ -110,9 +110,9 @@ Should show `rowsecurity = true`
 
 ## Summary of Files Created
 
-1. **[fix-with-trigger.sql](fix-with-trigger.sql)** - RECOMMENDED: Auto-create profiles with trigger
-2. **[fix-rls-complete.sql](fix-rls-complete.sql)** - Alternative: Manual insert with fixed policies
-3. **[supabase_schema_update.sql](supabase_schema_update.sql)** - Original attempt (superseded by above)
+1. **[004_profile_creation_trigger.sql](../supabase/migrations/004_profile_creation_trigger.sql)** - RECOMMENDED: Auto-create profiles with trigger
+2. **[003_fix_rls_complete.sql](../supabase/migrations/003_fix_rls_complete.sql)** - Alternative: Manual insert with fixed policies
+3. **[supabase_schema_update.sql](../supabase/migrations/002_profiles_invitations_rls_update.sql)** - Original attempt (superseded by above)
 
 ---
 

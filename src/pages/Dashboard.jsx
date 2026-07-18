@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/ui/Card'
-import { Plus, ScanLine, Calendar, CheckCircle, Clock, MapPin, X, Phone, Mail, Image } from 'lucide-react'
+import { Plus, ScanLine, Calendar, CheckCircle, Clock, MapPin, X, Phone, Mail, Image, PhoneMissed } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { FlyerModern } from '../components/flyers/FlyerModern'
@@ -23,6 +23,17 @@ export default function Dashboard() {
     const [ loadingInvites, setLoadingInvites ] = useState(true)
     const [ statusFilter, setStatusFilter ] = useState('all') // all, sent, attended
     const [ selectedInvite, setSelectedInvite ] = useState(null) // For modal
+    const [ phonePromptDismissed, setPhonePromptDismissed ] = useState(
+        () => sessionStorage.getItem('phonePromptDismissed') === '1'
+    )
+
+    const dismissPhonePrompt = () => {
+        sessionStorage.setItem('phonePromptDismissed', '1')
+        setPhonePromptDismissed(true)
+    }
+
+    // Prompt existing users who signed up before phone numbers were collected
+    const showPhonePrompt = profile && !profile.phone && !phonePromptDismissed
 
     // Fetch recent invites from database
     useEffect(() => {
@@ -57,7 +68,9 @@ export default function Dashboard() {
         }
 
         fetchRecentInvites()
-    }, [ user ])
+        // Key on the id, not the object — the user object gets a new reference
+        // on every token refresh, which would re-fetch invites needlessly
+    }, [ user?.id ])
 
     // Filter invites based on status
     const filteredInvites = useMemo(() => {
@@ -166,6 +179,32 @@ export default function Dashboard() {
     return (
         <Layout>
             <div className="flex flex-col space-y-8 mt-4">
+                {/* Phone number prompt for existing users */}
+                {showPhonePrompt && (
+                    <div className="flex items-start gap-3 p-4 rounded-lg bg-(--color-accent)/10 border border-(--color-accent)/30">
+                        <PhoneMissed size={18} className="text-(--color-accent) mt-0.5 shrink-0" />
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-white">Add your phone number</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                                Help us reach you about your invites and events.
+                            </p>
+                            <Link
+                                to="/settings"
+                                className="inline-block mt-2 text-xs font-semibold text-(--color-accent) hover:underline"
+                            >
+                                Update profile →
+                            </Link>
+                        </div>
+                        <button
+                            onClick={dismissPhonePrompt}
+                            className="cursor-pointer p-1 text-gray-400 hover:text-white transition-colors"
+                            aria-label="Dismiss"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                )}
+
                 {/* Hero Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -418,7 +457,8 @@ export default function Dashboard() {
                             <button
                                 onClick={() => {
                                     // Open WhatsApp with pre-filled message
-                                    window.open(`https://wa.me/${selectedInvite.guest_phone?.replace(/\D/g, '')}?text=Hi ${selectedInvite.guest_name}, just checking in! Looking forward to seeing you at ${selectedInvite.campuses?.name || 'church'}!`, '_blank')
+                                    const message = encodeURIComponent(`Hi ${selectedInvite.guest_name}, just checking in! Looking forward to seeing you at ${selectedInvite.campuses?.name || 'church'}!`)
+                                    window.open(`https://wa.me/${selectedInvite.guest_phone?.replace(/\D/g, '')}?text=${message}`, '_blank', 'noopener,noreferrer')
                                 }}
                                 className="cursor-pointer w-full py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                             >

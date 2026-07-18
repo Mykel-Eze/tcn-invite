@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { PasswordInput } from '../components/ui/PasswordInput'
 import { Card } from '../components/ui/Card'
 import logo from '../assets/images/tcn_icon_white.png'
 
@@ -104,9 +105,8 @@ export default function Login() {
                             required
                         />
 
-                        <Input
+                        <PasswordInput
                             label="Password"
-                            type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"

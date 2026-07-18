@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/ui/Button'
-import { Input } from '../components/ui/Input'
+import { PasswordInput } from '../components/ui/PasswordInput'
 import { Card } from '../components/ui/Card'
 import logo from '../assets/images/tcn_icon_white.png'
 
@@ -22,8 +22,8 @@ export default function UpdatePassword() {
             return setError('Passwords do not match')
         }
 
-        if (password.length < 6) {
-            return setError('Password must be at least 6 characters')
+        if (password.length < 8) {
+            return setError('Password must be at least 8 characters')
         }
 
         setLoading(true)
@@ -67,18 +67,16 @@ export default function UpdatePassword() {
                             </div>
                         )}
 
-                        <Input
+                        <PasswordInput
                             label="New Password"
-                            type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="New password"
                             required
                         />
 
-                        <Input
+                        <PasswordInput
                             label="Confirm New Password"
-                            type="password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Confirm new password"

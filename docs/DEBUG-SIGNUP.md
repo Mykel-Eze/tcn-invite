@@ -113,7 +113,7 @@ Should return: `on_auth_user_created`
 
 If not found:
 - ❌ Trigger wasn't created
-- ✅ Run [fix-with-trigger.sql](fix-with-trigger.sql) again
+- ✅ Run [004_profile_creation_trigger.sql](../supabase/migrations/004_profile_creation_trigger.sql) again
 
 ### **2. Check Trigger Function**
 ```sql

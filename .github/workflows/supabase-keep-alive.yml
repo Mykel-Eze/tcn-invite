@@ -1,6 +1,8 @@
-# Keeps the free-tier Supabase project from being paused for inactivity
-# (Supabase pauses free projects after ~7 days without activity).
-# Runs every 3 days and makes a tiny read against the public `campuses` table.
+# Keeps the free-tier Supabase project from being paused for inactivity.
+# Supabase pauses free projects that lack "sufficient database activity" over
+# a week, and a tiny read every few days turned out not to be enough. So this
+# runs twice a day and does a real write (public.keep_alive(), see
+# supabase/migrations/009_keep_alive_heartbeat.sql) plus a read.
 #
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   SUPABASE_URL       – same value as VITE_SUPABASE_URL
@@ -10,31 +12,50 @@ name: Supabase keep-alive
 
 on:
   schedule:
-    - cron: "0 9 */3 * *" # 09:00 UTC on every 3rd day of the month
+    # Off the top of the hour, when GitHub is least likely to delay or drop runs.
+    - cron: "23 5,17 * * *" # 05:23 and 17:23 UTC every day
   workflow_dispatch: # allows a manual run from the Actions tab
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
-      - name: Query Supabase
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      - name: Check secrets
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
             echo "::error::SUPABASE_URL or SUPABASE_ANON_KEY secret is not set"
             exit 1
           fi
+
+      - name: Write heartbeat
+        run: |
           status=$(curl -sS -o response.json -w "%{http_code}" \
-            --retry 3 --retry-delay 10 \
-            "${SUPABASE_URL%/}/rest/v1/campuses?select=id&limit=1" \
-            -H "apikey: ${SUPABASE_ANON_KEY}")
+            --retry 3 --retry-delay 10 --retry-all-errors \
+            -X POST "${SUPABASE_URL%/}/rest/v1/rpc/keep_alive" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{}') || true
           echo "HTTP $status"
-          if [ "$status" -ne 200 ]; then
-            cat response.json
-            echo "::error::Supabase keep-alive request failed"
+          cat response.json 2>/dev/null; echo
+          if [ "$status" != "200" ]; then
+            echo "::error::Heartbeat write failed. If the host can't be resolved, the project is already paused: restore it in the Supabase dashboard."
+            exit 1
+          fi
+
+      - name: Read a table
+        run: |
+          status=$(curl -sS -o response.json -w "%{http_code}" \
+            --retry 3 --retry-delay 10 --retry-all-errors \
+            "${SUPABASE_URL%/}/rest/v1/campuses?select=id&limit=5" \
+            -H "apikey: ${SUPABASE_ANON_KEY}") || true
+          echo "HTTP $status"
+          if [ "$status" != "200" ]; then
+            cat response.json 2>/dev/null
+            echo "::error::Read request failed"
             exit 1
           fi
           echo "Supabase is awake."
